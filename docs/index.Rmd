@@ -7,6 +7,9 @@ output:
     toc: FALSE #overwrite the _yml
 ---
 
+URL of this page:
+https://michaeldgarber.github.io/gsynth-nianogo-et-al/index.html
+
 Github repository:
 https://github.com/michaeldgarber/gsynth-nianogo-et-al
 
