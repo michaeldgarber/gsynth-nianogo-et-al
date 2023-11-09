@@ -3,10 +3,10 @@ title: "Appendix for comment on Nianogo et al."
 author: "Michael D Garber"
 date: "`r Sys.Date()`"
 output:
-  html_document:
+  bookdown::html_document2:
     toc: true
     toc_float: true
-    number_sections: true
+    toc_depth: 4
 ---
 ```{r "setup", include=FALSE, eval=TRUE, echo=FALSE}
 library(mapview)

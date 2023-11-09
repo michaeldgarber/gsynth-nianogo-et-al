@@ -7,3 +7,8 @@ navbar:
       text: "MDG"
     - text: "Comment on Nianogo et al."
       href: index.html
+output:
+  bookdown::html_document2:
+    toc: true 
+    toc_float: true
+    toc_depth: 4
