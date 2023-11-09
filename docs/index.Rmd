@@ -1,0 +1,12 @@
+---
+title: "Comment on Nianogo et al."
+author: "Michael D. Garber, PhD MPH"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Github repository:
+https://github.com/michaeldgarber/gsynth-nianogo-et-al
+
+Appendix:
+https://michaeldgarber.github.io/gsynth-nianogo-et-al/comment-appendix.html
