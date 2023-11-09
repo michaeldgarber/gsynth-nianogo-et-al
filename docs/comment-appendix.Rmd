@@ -1,0 +1,72 @@
+---
+title: "Appendix for comment on Nianogo et al."
+author: "Michael D Garber"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+```{r "setup", include=FALSE, eval=TRUE, echo=FALSE}
+library(mapview)
+library(tidyverse)
+library(here)
+library(sf)
+
+#Load data
+setwd(here("data","data-processed"))
+load("black_complete_geo.RData")
+load("hispanic_complete_geo.RData")
+```
+# Medicaid expansion by state, 2019, available CVD outcome data
+## States with non-missing outcome data for the Hispanic subpopulation
+```{r}
+#Number of non-missing states
+hispanic_complete_geo %>%
+  filter(year==2019) %>% 
+  st_set_geometry(NULL) %>% 
+  group_by(treated) %>% 
+  summarise(n=n())
+
+hispanic_complete_geo %>% 
+  filter(year==2019) %>% 
+  dplyr::select(starts_with("state_abb"),starts_with("treated"),starts_with("year"),race) %>% 
+  mutate(treated_char=as.character(treated)) %>% 
+  mapview(zcol="treated_char",
+          layer.name="Medicaid expansion state, 2019")
+```
+
+## States with non-missing data for the Black subpopulation
+```{r}
+#Number of non-missing states
+black_complete_geo %>%
+  filter(year==2019) %>% 
+  st_set_geometry(NULL) %>% 
+  group_by(treated) %>% 
+  summarise(n=n())
+black_complete_geo %>% 
+  filter(year==2019) %>% 
+  dplyr::select(starts_with("state_abb"),starts_with("treated"),starts_with("year"),race) %>% 
+  mutate(treated_char=as.character(treated)) %>% 
+  mapview(zcol="treated_char",
+          layer.name="Medicaid expansion state, 2019")
+```
+
+# Replicate Nianogo et al., Table 1, main text
+```{r, eval=T, echo=F,warning=FALSE, message=F}
+#Plot following their code
+#Not sure how/why it's printing when I'm simly defining the object, but asi es
+#plot_est_overall_authors=
+setwd(here("data","data-processed"))
+load("est_overall_authors.RData")
+library(gsynth)
+library(panelView)
+
+plot(
+  est_overall_authors, 
+  type = "counterfactual", 
+  raw = "none")
+
+```
+
