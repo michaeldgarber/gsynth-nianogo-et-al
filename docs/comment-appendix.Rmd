@@ -1,6 +1,6 @@
 ---
 title: "Appendix for comment on Nianogo et al."
-author: "Michael D Garber"
+author: "Michael D. Garber"
 date: "`r Sys.Date()`"
 output:
   bookdown::html_document2:
@@ -8,50 +8,156 @@ output:
     toc_float: true
     toc_depth: 4
 ---
-```{r "setup", include=FALSE, eval=TRUE, echo=FALSE}
-library(mapview)
-library(tidyverse)
-library(here)
-library(sf)
 
-#Load data
+```{r,eval=T, echo=F,warning=FALSE, message=F}
+library(here)
+library(tidyverse)
+library(mapview) #for interactive mapping
+library(tmap) #static mapping
+library(sf) #for managing spatial data
+library(gsynth) #to run the generalized synthetic control method
+library(RColorBrewer) #for creating color palettes
+```
+
+# Intro 
+This appendix contains supporting information and code related to my comment on Nianogo et al.'s article.
+
+The R Markdown file that creates this web page is located here:
+https://github.com/michaeldgarber/gsynth-nianogo-et-al/blob/main/docs/comment-appendix.Rmd
+
+
+The authors provide their data and code here:
+https://anonymous.4open.science/r/Medicaid-CVD-Disparities-4CB7/README.md
+
+I've done some additional processing to that data in the scripts located in this folder:
+https://github.com/michaeldgarber/gsynth-nianogo-et-al/tree/main/scripts
+
+They can be run in the following order:
+```{r, eval=F, echo=T,warning=FALSE, message=F}
+source(here("scripts", "read-wrangle-data-acs.R"))
+source(here("scripts", "read-wrangle-data-pres-election.R"))
+source(here("scripts", "read-wrangle-data-nianogo-et-al.R"))
+```
+
+
+# Explore data
+```{r, eval=T, echo=F,warning=FALSE, message=F}
+#Load the data. Don't show this code chunk in the html.
+#Note these data are created here:
 setwd(here("data","data-processed"))
+load("black_complete.RData")
+load("hispanic_complete.RData")
 load("black_complete_geo.RData")
 load("hispanic_complete_geo.RData")
-```
-# Medicaid expansion by state, 2019, available CVD outcome data
-## States with non-missing outcome data for the Hispanic subpopulation
-```{r}
-#Number of non-missing states
-hispanic_complete_geo %>%
-  filter(year==2019) %>% 
-  st_set_geometry(NULL) %>% 
-  group_by(treated) %>% 
-  summarise(n=n())
-
-hispanic_complete_geo %>% 
-  filter(year==2019) %>% 
-  dplyr::select(starts_with("state_abb"),starts_with("treated"),starts_with("year"),race) %>% 
-  mutate(treated_char=as.character(treated)) %>% 
-  mapview(zcol="treated_char",
-          layer.name="Medicaid expansion state, 2019")
+load("overall.RData")
+load("overall_geo.RData")
+load("overall_covars_alt.RData")
+load("lookup_state_abb_geo.RData")
+load("lookup_state_abb_geo_simplify_shift_al_hi.RData")
 ```
 
-## States with non-missing data for the Black subpopulation
-```{r}
-#Number of non-missing states
-black_complete_geo %>%
+## Medicaid expansion and missingness
+
+### Medicaid expansion (all states, 2019)
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+overall %>%
   filter(year==2019) %>% 
-  st_set_geometry(NULL) %>% 
   group_by(treated) %>% 
-  summarise(n=n())
-black_complete_geo %>% 
-  filter(year==2019) %>% 
-  dplyr::select(starts_with("state_abb"),starts_with("treated"),starts_with("year"),race) %>% 
-  mutate(treated_char=as.character(treated)) %>% 
-  mapview(zcol="treated_char",
-          layer.name="Medicaid expansion state, 2019")
+  summarise(n=n()) %>% 
+  knitr::kable(caption="Medicaid expansion status (2019)")
+
 ```
+
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+#Create color palettes for maps
+pal_puor_4=brewer.pal(name="PuOr",n=4)
+pal_puor_4_subset=pal_puor_4[c(1,2,4)]
+pal_puor_4_reorder = c(pal_puor_4_subset,pal_puor_4[3])
+pal_puor_2=pal_puor_4_reorder[c(1,3)]
+#pal_puor_2 %>% swatch()
+
+lookup_state_abb_geo_simplify_shift_al_hi %>% 
+  left_join(overall_covars_alt,by="state_abb") %>% 
+  filter(year==2019) %>% 
+  mutate(treated_y_n=case_when(
+    treated==1~"Yes",
+    TRUE ~"No")) %>% 
+  tm_shape()+
+  tm_fill(
+    "treated_y_n",
+    palette = pal_puor_2,
+    title="Medicaid expansion status (2019)")+
+  tm_borders(col="black",alpha=.5)+
+  tm_layout(
+    frame=F,
+    legend.outside=T,
+    legend.outside.position="bottom"
+  )
+```
+
+
+### Hispanic population
+```{r,eval=T, echo=F,warning=FALSE, message=F}
+#Number of non-missing states
+hispanic_complete %>%
+  filter(year==2019) %>% 
+  group_by(treated) %>% 
+  summarise(n=n()) %>% 
+  knitr::kable(caption="Medicaid expansion status (2019) among states with non-missing CVD data for the Hispanic population")
+
+lookup_state_abb_geo_simplify_shift_al_hi %>% 
+  left_join(overall_covars_alt,by="state_abb") %>% 
+  filter(year==2019) %>% 
+  tm_shape()+
+  tm_fill(
+    "treated_post_hispanic_miss",
+    palette=pal_puor_4_reorder,
+    title="Medicaid expansion status (2019) by missingness in Hispanic data")+
+  tm_borders(col="black",alpha=1)+
+  tm_layout(
+    frame=F,
+#    legend.title.size=.5,
+    legend.outside=T,
+    legend.outside.position="bottom"
+    )
+
+```
+
+### Black population
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+black_complete %>%
+  filter(year==2019) %>% 
+  group_by(treated) %>% 
+  summarise(n=n()) %>% 
+  knitr::kable(caption="Medicaid expansion status (2019) among states with non-missing CVD data for the Black population")
+
+lookup_state_abb_geo_simplify_shift_al_hi %>% 
+  left_join(overall_covars_alt,by="state_abb") %>% 
+  filter(year==2019) %>% 
+  tm_shape()+
+  tm_fill(
+    "treated_post_black_miss",
+    palette=pal_puor_4_reorder,
+    title="Medicaid expansion status (2019) by missingness in Black data")+
+  tm_borders(col="black",alpha=1)+
+  tm_layout(
+    frame=F,
+#    legend.title.size=.5,
+    legend.outside=T,
+    legend.outside.position="bottom"
+    )
+
+
+```
+
+## Distribution of BRFSS covariates
+
+
+### Proportion men
+
+
+
+
 
 # Replicate Nianogo et al., Table 1, main text
 ```{r, eval=T, echo=F,warning=FALSE, message=F}
@@ -69,4 +175,5 @@ plot(
   raw = "none")
 
 ```
+# Use state-year effect estimates from gsynth to calculate summary measures
 
