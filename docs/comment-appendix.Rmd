@@ -205,10 +205,10 @@ white %>%
   theme_bw()
 ```
 
-## Low income
+### Low income
 Less than $15,000
 
-### All adults aged 45-64
+#### All adults aged 45-64
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 summary(overall$low_income)
 overall %>% 
@@ -218,7 +218,7 @@ overall %>%
 ```
 
 
-### Hispanic adults aged 45-64
+#### Hispanic adults aged 45-64
 Again, there are what I would think are some implausible observations (e.g,. 0% or 100% low income in a state-year).
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 summary(hispanic_complete$low_income)
@@ -228,7 +228,7 @@ hispanic_complete %>%
   theme_bw()
 ```
 
-### Black adults aged 45-64
+#### Black adults aged 45-64
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 summary(black_complete$low_income)
 black_complete %>% 
@@ -237,7 +237,7 @@ black_complete %>%
   theme_bw()
 ```
 
-### White adults aged 45-64
+#### White adults aged 45-64
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 summary(white$low_income)
 white %>% 
@@ -246,9 +246,9 @@ white %>%
   theme_bw()
 ```
 
-## Low education
+### Low education
 No high-school degree
-### All adults aged 45-64
+#### All adults aged 45-64
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 summary(overall$low_educ)
 overall %>% 
@@ -258,7 +258,7 @@ overall %>%
 ```
 
 
-### Hispanic adults aged 45-64
+#### Hispanic adults aged 45-64
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 summary(hispanic_complete$low_educ)
 hispanic_complete %>% 
@@ -267,7 +267,7 @@ hispanic_complete %>%
   theme_bw()
 ```
 
-### Black adults aged 45-64
+#### Black adults aged 45-64
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 summary(black_complete$low_educ)
 black_complete %>% 
@@ -276,7 +276,7 @@ black_complete %>%
   theme_bw()
 ```
 
-### White adults aged 45-64
+#### White adults aged 45-64
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 summary(white$low_educ)
 white %>% 
@@ -286,9 +286,9 @@ white %>%
 ```
 
 
-## Married
+### Married
 
-### All adults aged 45-64
+#### All adults aged 45-64
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 summary(overall$married)
 overall %>% 
@@ -298,7 +298,7 @@ overall %>%
 ```
 
 
-### Hispanic adults aged 45-64
+#### Hispanic adults aged 45-64
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 summary(hispanic_complete$married)
 hispanic_complete %>% 
@@ -307,7 +307,7 @@ hispanic_complete %>%
   theme_bw()
 ```
 
-### Black adults aged 45-64
+#### Black adults aged 45-64
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 summary(black_complete$married)
 black_complete %>% 
@@ -316,7 +316,7 @@ black_complete %>%
   theme_bw()
 ```
 
-### White adults aged 45-64
+#### White adults aged 45-64
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 summary(white$married)
 white %>% 
@@ -325,7 +325,7 @@ white %>%
   theme_bw()
 ```
 
-## Political orientation and considering an alternative measure
+### Political orientation and considering an alternative measure
 In Nianogo et al.'s Table 1, they present the measure of political-party affiliation in 2014.
 The below replicates those values, where 0=Republican, 1=Democrat, and 2=Split.
 
