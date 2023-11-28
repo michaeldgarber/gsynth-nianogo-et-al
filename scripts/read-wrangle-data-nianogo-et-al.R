@@ -77,6 +77,7 @@ setwd(here("data","data-processed"))
 save(overall,file="overall.RData")
 save(black_complete,file="black_complete.RData")
 save(hispanic_complete,file="hispanic_complete.RData")
+save(white,file="white.RData")
 
 #treatedpost: the treatment variable
 #cvd_death_rate: outcome variable
@@ -1025,10 +1026,10 @@ overall_covars_alt=overall %>%
     
     #a variable for mapping tx status by missingness
     treated_post_hispanic_miss=case_when(
-      treatedpost==1 & hispanic_miss==1 ~ "Yes, Hispanic data missing",
-      treatedpost==1 & hispanic_miss==0 ~ "Yes, Hispanic data available",
-      treatedpost==0 & hispanic_miss==1 ~ "No, Hispanic data missing",
-      treatedpost==0 & hispanic_miss==0 ~ "No, Hispanic data available"),
+      treatedpost==1 & hispanic_miss==1 ~ "Yes, outcome data missing in Hispanic pop.",
+      treatedpost==1 & hispanic_miss==0 ~ "Yes, outcome data available in Hispanic pop.",
+      treatedpost==0 & hispanic_miss==1 ~ "No, outcome data missing in Hispanic pop.",
+      treatedpost==0 & hispanic_miss==0 ~ "No, outcome data available in Hispanic pop."),
 
     black_miss=case_when(
       black_not_miss==1~0,
@@ -1036,10 +1037,10 @@ overall_covars_alt=overall %>%
       
     #a variable for mapping tx status by missingness
     treated_post_black_miss=case_when(
-      treatedpost==1 & black_miss==1 ~ "Yes, Black data missing",
-      treatedpost==1 & black_miss==0 ~ "Yes, Black data available",
-      treatedpost==0 & black_miss==1 ~ "No, Black data missing",
-      treatedpost==0 & black_miss==0 ~ "No, Black data available"),
+      treatedpost==1 & black_miss==1 ~ "Yes, outcome data missing in Black pop.",
+      treatedpost==1 & black_miss==0 ~ "Yes, outcome data available in Black pop.",
+      treatedpost==0 & black_miss==1 ~ "No, outcome data missing in Black pop.",
+      treatedpost==0 & black_miss==0 ~ "No, outcome data available in Black pop."),
           
     white_miss=case_when(
       white_not_miss==1~0,

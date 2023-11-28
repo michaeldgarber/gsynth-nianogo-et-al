@@ -49,6 +49,7 @@ load("black_complete.RData")
 load("hispanic_complete.RData")
 load("black_complete_geo.RData")
 load("hispanic_complete_geo.RData")
+load("white.RData")
 load("overall.RData")
 load("overall_geo.RData")
 load("overall_covars_alt.RData")
@@ -57,15 +58,16 @@ load("lookup_state_abb_geo_simplify_shift_al_hi.RData")
 ```
 
 ## Medicaid expansion and missingness
+In this section, I explore Medicaid expansion status by missingness status in the demographic groups.
 
 ### Medicaid expansion (all states, 2019)
+This map shows Medicaid expansion status over all states in 2019.
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 overall %>%
   filter(year==2019) %>% 
   group_by(treated) %>% 
   summarise(n=n()) %>% 
   knitr::kable(caption="Medicaid expansion status (2019)")
-
 ```
 
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
@@ -147,33 +149,243 @@ lookup_state_abb_geo_simplify_shift_al_hi %>%
     legend.outside.position="bottom"
     )
 
-
 ```
 
 ## Distribution of BRFSS covariates
-
+In this section, I examine the distribution of some of the BRFSS covariates used in the analysis to see if the BRFSS data may be contributing to the instability of the effect estimates.
 
 ### Proportion men
+#### All adults aged 45-64
+Proportion men among all adults aged 45-64 (dataset name: overall)
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(overall$male)
+overall %>% 
+  ggplot(aes(x=male))+
+  geom_histogram()+
+  theme_bw()
+```
+
+#### Hispanic adults aged 45-64
+Proportion men among Hispanic adults aged 45-64 (dataset name: hispanic_complete)
+
+Observation: some state-years have 0% or 100% men in this group, which is not plausible, highlighting the fact that BRFSS may not be reliable in such stratified sub-groups.
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(hispanic_complete$male)
+hispanic_complete %>% 
+  ggplot(aes(x=male))+
+  geom_histogram()+
+  theme_bw()
+```
+
+In California, most years seem implausibly low.
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+hispanic_complete %>% 
+  filter(state_abb=="CA") %>% 
+  ggplot(aes(y=male,x=year))+
+  geom_line()+
+  theme_bw()
+```
+
+#### Black adults aged 45-64
+Again, the proportion men among Black adults aged 45-64 seems implausible in some state-years.
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(black_complete$male)
+black_complete %>% 
+  ggplot(aes(x=male))+
+  geom_histogram()+
+  theme_bw()
+```
+
+#### White adults aged 45-64
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(white$male)
+white %>% 
+  ggplot(aes(x=male))+
+  geom_histogram()+
+  theme_bw()
+```
+
+## Low income
+Less than $15,000
+
+### All adults aged 45-64
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(overall$low_income)
+overall %>% 
+  ggplot(aes(x=low_income))+
+  geom_histogram()+
+  theme_bw()
+```
 
 
+### Hispanic adults aged 45-64
+Again, there are what I would think are some implausible observations (e.g,. 0% or 100% low income in a state-year).
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(hispanic_complete$low_income)
+hispanic_complete %>% 
+  ggplot(aes(x=low_income))+
+  geom_histogram()+
+  theme_bw()
+```
+
+### Black adults aged 45-64
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(black_complete$low_income)
+black_complete %>% 
+  ggplot(aes(x=low_income))+
+  geom_histogram()+
+  theme_bw()
+```
+
+### White adults aged 45-64
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(white$low_income)
+white %>% 
+  ggplot(aes(x=low_income))+
+  geom_histogram()+
+  theme_bw()
+```
+
+## Low education
+No high-school degree
+### All adults aged 45-64
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(overall$low_educ)
+overall %>% 
+  ggplot(aes(x=low_educ))+
+  geom_histogram()+
+  theme_bw()
+```
 
 
+### Hispanic adults aged 45-64
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(hispanic_complete$low_educ)
+hispanic_complete %>% 
+  ggplot(aes(x=low_educ))+
+  geom_histogram()+
+  theme_bw()
+```
 
-# Replicate Nianogo et al., Table 1, main text
-```{r, eval=T, echo=F,warning=FALSE, message=F}
-#Plot following their code
-#Not sure how/why it's printing when I'm simly defining the object, but asi es
-#plot_est_overall_authors=
-setwd(here("data","data-processed"))
-load("est_overall_authors.RData")
-library(gsynth)
-library(panelView)
+### Black adults aged 45-64
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(black_complete$low_educ)
+black_complete %>% 
+  ggplot(aes(x=low_educ))+
+  geom_histogram()+
+  theme_bw()
+```
 
-plot(
-  est_overall_authors, 
-  type = "counterfactual", 
-  raw = "none")
+### White adults aged 45-64
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(white$low_educ)
+white %>% 
+  ggplot(aes(x=low_educ))+
+  geom_histogram()+
+  theme_bw()
+```
+
+
+## Married
+
+### All adults aged 45-64
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(overall$married)
+overall %>% 
+  ggplot(aes(x=married))+
+  geom_histogram()+
+  theme_bw()
+```
+
+
+### Hispanic adults aged 45-64
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(hispanic_complete$married)
+hispanic_complete %>% 
+  ggplot(aes(x=married))+
+  geom_histogram()+
+  theme_bw()
+```
+
+### Black adults aged 45-64
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(black_complete$married)
+black_complete %>% 
+  ggplot(aes(x=married))+
+  geom_histogram()+
+  theme_bw()
+```
+
+### White adults aged 45-64
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(white$married)
+white %>% 
+  ggplot(aes(x=married))+
+  geom_histogram()+
+  theme_bw()
+```
+
+## Political orientation and considering an alternative measure
+In Nianogo et al.'s Table 1, they present the measure of political-party affiliation in 2014.
+The below replicates those values, where 0=Republican, 1=Democrat, and 2=Split.
+
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+overall %>% 
+  filter(year==2014) %>% 
+  group_by(party) %>% 
+  summarise(
+    n=n()) %>% 
+  ungroup() %>% 
+  mutate(
+    n_total=sum(n),
+    prop=n/n_total
+    ) %>% 
+  knitr::kable()
+```
+
+To facilitate interpretation, this variable in 2016 is mapped here:
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+lookup_state_abb_geo_simplify_shift_al_hi %>% 
+  left_join(overall_covars_alt,by="state_abb") %>% 
+  filter(year==2016) %>%
+  mutate(
+    party_overall_char=case_when(
+      party_overall==0~"Republican",
+      party_overall==1~"Democrat",
+      party_overall==2~"Split"
+  )) %>% 
+  tm_shape()+
+  tm_fill(
+    "party_overall_char",
+    palette=c("#67a9cf","#ef8a62","#af8dc3"),
+    title="Political party variable (2016)"
+)+
+  tm_borders(col="black",alpha=.5)+
+  tm_layout(
+    frame=F,
+    legend.outside=T,
+    legend.outside.position="bottom"
+  )
 
 ```
-# Use state-year effect estimates from gsynth to calculate summary measures
+
+These values struck me as somewhat odd. For one, it appears a given state-year receives a value of either Republican, Democrat, or split, raising the question of within-state variability in the measure. Second, given the polarization and parity of party politics in the United States, I would expect the values corresponding to Republican (0) and Democrat (1) to be about the same and for both to be nearer to 50%.
+
+A simpler and more stable (in terms of sampling variability) measure for the state's political environment might be the popular-vote share from presidential elections. Those data are available here:
+
+https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/42MVDX
+
+In this script, I've loaded popular-vote data from presidential elections.
+```{r,eval=F}
+source(here("scripts", "read-wrangle-data-pres-election.R"))
+```
+
+In analyses as presented in Scenarios 2-5 in the main text, I applied the vote share from the most recent election if the year wasn't an election year. For example, 2014 received 2012's popular-vote data.
+
+
+# Use state-year effect estimates from the gsynth function to calculate summary measures of effect
+In this section, I demonstrate the state-year effect estimates can be used to calculate various summary measures, including ratios, and differences, and weighted versions.
+
+
+
 
