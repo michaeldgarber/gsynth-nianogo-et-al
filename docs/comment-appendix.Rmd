@@ -386,7 +386,7 @@ In analyses as presented in Scenarios 2-5 in the main text, I applied the vote s
 # Use state-year effect estimates from the gsynth function to calculate summary measures of effect
 In this section, I use state-year effect estimates to calculate the summary measures of effect in the main text's table.
 
-This code will populate values for Scenario 5 in the table in which we used the MC-. Code for the other analyses can be found here:
+This code will populate values for Scenario 5 in the table in which I used for the MC-NNM estimator. Code for the other analyses can be found here:
 gsynth-nianogo-et-al/scripts/gsynth-analyses-to-post.R
 
 ## Load the data
@@ -405,6 +405,7 @@ load("gsynth_out_overall_sub_pol_mc_nnm.RData")
 ## Run the gsynth function
 
 Here, I will summarize effects estimated by the MC-NNM estimator as presented in Scenario 5 of the table in the text.
+
 Also see
 https://yiqingxu.org/packages/gsynth/articles/tutorial.html#matrix-completion
 
@@ -449,6 +450,7 @@ gsynth_out_overall_sub_pol_mc_nnm=gsynth(
 
 
 ## Examine summary output returned by the gsynth function
+### Average treatment effect with confidence intervals
 Return the average (unweighted) difference effect over all treated state-years and the corresponding standard error and confidence intervals.
 ```{r}
 gsynth_out_overall_sub_pol_mc_nnm$est.avg
@@ -469,22 +471,96 @@ gsynth_out_overall_sub_pol_mc_nnm$est.avg[1]-
   gsynth_out_overall_sub_pol_mc_nnm$est.avg[2]*1.959964
 ```
 
-Another way to return the average treatment effect without the confidence intervals
+### Average treatment effect - point estimate only
+Another way to return the point estimate for the average treatment effect (without the confidence intervals) is by `gsynth_object$att.avg`.
 ```{r}
 gsynth_out_overall_sub_pol_mc_nnm$att.avg
 ```
 
-The average treatment effect at each time point can be returned by `gsynth_object$att`. These effect estimates are summarized over units where time is scaled to the treatment period for that unit. That is, 1 corresponds to the first treated year for each treated state, regardless of the calendar year.
+
+
+### Average treatment effect at each time point
+
 ```{r}
 gsynth_out_overall_sub_pol_mc_nnm$att
 ```
 
-## Return effect estimates for every treated state-year
-Using the effect estimates for every treated state-year, we can replicate the summary difference effects presented above.
+## Summarize effect estimates for every treated state-year to calculate the unweighted average
+The average treatment effect at each time point can be returned by `gsynth_object$att`. These effect estimates are summarized over units where time is scaled to the treatment period for that unit. That is, 1 corresponds to the first treated year for each treated state, regardless of the calendar year.
+
+### Return effect estimates for every treated state-year
+Using the effect estimates for every treated state-year, we can replicate the summary difference effects presented above. Effect estimates for every treated state-year are returned by `gsynth_objecct$eff`.
 
 Here are the difference effects for all state-years. Note that "effects" are estimated for all state-years in the treated states, including pre-treatment years. Pre-treatment effects are the difference between the observed and predicted counterfactual outcomes before treatment.
 ```{r}
 gsynth_out_overall_sub_pol_mc_nnm$eff
 ```
+
+### Wrangle state-year effect estimates in easier-to-read form
+Do some data wrangling to the effect estimates to summarize them.
+
+Notes on my naming conventions for the object:
+* tib -  for tibble
+* diff_eff_by_state_year - difference effects by state-year
+* mc_nnm - to indicate which gsynth model
+
+Also note that these results are among the total population, not in a demographic subgroup.
+```{r}
+tib_diff_eff_by_state_year_mc_nnm=gsynth_out_overall_sub_pol_mc_nnm$eff %>% 
+  as_tibble() %>% #Convert to tibble
+  mutate(year=row_number()+1999)  %>% #Add 1999 to row number to calculate year
+  dplyr::select(year,everything()) %>% 
+  pivot_longer(cols=-year) %>%  #make the dataset long-form
+  #Rename some of the columns
+  rename(
+    state_id = name,
+    diff_pt = value #estimated difference effect
+    ) %>% 
+  mutate(state_id=as.numeric(state_id)) #make sure state_id is numeric
+
+tib_diff_eff_by_state_year_mc_nnm
+```
+
+Before we summarize these difference effect estimates, we can link in the treatment indicator so that we know whether the difference effects are during the post-treatment period. The treatment indicator is obtained by calling gsynth_object$D.tr. 
+
+(The letter D is conventionally used in the econometrics literature to denote the treatment status.)
+
+diff_eff_by_state_year_mc_nnm
+```{r}
+tib_treatedpost =gsynth_out_overall_sub_pol_mc_nnm$D.tr %>% 
+  as_tibble() %>%
+  mutate(year=row_number()+1999) %>% 
+  dplyr::select(year,everything()) %>% 
+  pivot_longer(cols=-year) %>% 
+  rename(
+    state_id = name,
+    treatedpost = value) %>% 
+  mutate(state_id=as.numeric(state_id))
+
+tib_treatedpost
+```
+
+### Calculate unweighted average difference effect 
+Now we can link those two together to summarize the difference effects over the post-treatment period (which varies by state). It should match the average treatment effect obtained above.
+
+```{r}
+diff_pt_avg_mc_nnm=tib_diff_eff_by_state_year_mc_nnm %>% 
+  #Link the treatment indicator to the difference effects by state-year
+  left_join(tib_treatedpost,by=c("state_id","year")) %>%
+  group_by(treatedpost) %>% 
+  #take the simple mean by treatment indicator
+  summarise(
+    diff_pt_avg=mean(diff_pt,na.rm=T)
+  )
+
+diff_pt_avg_mc_nnm
+```
+
+The average difference effect post-treatment indeed matches the value returned by `gsynth_object$att.avg`, which demonstrates that the average treatment effect returned by the gsynth's default output is the unweighted average over treated state-years.
+```{r}
+gsynth_out_overall_sub_pol_mc_nnm$att.avg
+```
+
+
 
 
