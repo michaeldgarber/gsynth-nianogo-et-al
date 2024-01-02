@@ -11,7 +11,7 @@
 
 <meta name="author" content="Michael D. Garber" />
 
-<meta name="date" content="2023-11-28" />
+<meta name="date" content="2024-01-02" />
 
 <title>Appendix for comment on Nianogo et al.</title>
 
@@ -36,8 +36,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-6.2.1/css/all.min.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-6.2.1/css/v4-shims.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -345,7 +345,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Appendix for comment on Nianogo et al.</h1>
 <h4 class="author">Michael D. Garber</h4>
-<h4 class="date">2023-11-28</h4>
+<h4 class="date">2024-01-02</h4>
 
 </div>
 
@@ -371,7 +371,7 @@ source(here(&quot;scripts&quot;, &quot;read-wrangle-data-nianogo-et-al.R&quot;))
 <p>In this section, I explore Medicaid expansion status by missingness status in the demographic groups.</p>
 <div id="medicaid-expansion-all-states-2019" class="section level3" number="2.1.1">
 <h3><span class="header-section-number">2.1.1</span> Medicaid expansion (all states, 2019)</h3>
-<p>This map shows Medicaid expansion status over all states in 2019.</p>
+<p>This map shows Medicaid expansion status of states in 2019.</p>
 <table>
 <caption><span id="tab:unnamed-chunk-4">Table 2.1: </span>Medicaid expansion status (2019)</caption>
 <thead>
@@ -605,7 +605,222 @@ The below replicates those values, where 0=Republican, 1=Democrat, and 2=Split.<
 </div>
 <div id="use-state-year-effect-estimates-from-the-gsynth-function-to-calculate-summary-measures-of-effect" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> Use state-year effect estimates from the gsynth function to calculate summary measures of effect</h1>
-<p>In this section, I demonstrate the state-year effect estimates can be used to calculate various summary measures, including ratios, and differences, and weighted versions.</p>
+<p>In this section, I use state-year effect estimates to calculate the summary measures of effect in the main text’s table.</p>
+<p>This code will populate values for Scenario 5 in the table in which we used the MC-. Code for the other analyses can be found here:
+gsynth-nianogo-et-al/scripts/gsynth-analyses-to-post.R</p>
+<div id="load-the-data" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Load the data</h2>
+<pre class="r"><code>source(here(&quot;scripts&quot;, &quot;read-wrangle-data-acs.R&quot;))
+source(here(&quot;scripts&quot;, &quot;read-wrangle-data-pres-election.R&quot;))
+source(here(&quot;scripts&quot;, &quot;read-wrangle-data-nianogo-et-al.R&quot;))</code></pre>
+</div>
+<div id="run-the-gsynth-function" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Run the gsynth function</h2>
+<p>Here, I will summarize effects estimated by the MC-NNM estimator as presented in Scenario 5 of the table in the text.
+Also see
+<a href="https://yiqingxu.org/packages/gsynth/articles/tutorial.html#matrix-completion" class="uri">https://yiqingxu.org/packages/gsynth/articles/tutorial.html#matrix-completion</a></p>
+<pre class="r"><code>gsynth_out_overall_sub_pol_mc_nnm=gsynth(
+  #outcome ~ treatment indicator+ covariates
+  cvd_death_rate ~ treatedpost + 
+    primarycare_rate +
+    cardio_rate + 
+    population_overall + 
+    low_educ_overall + 
+    married_overall+ 
+    employed_for_wages_overall + 
+    vote_share_dem+#popular vote data
+    low_income_overall + 
+    male_overall + 
+    race_nonwhite_overall
+  ,
+
+  #dataset in which the effects are estimated
+  data = overall_covars_alt,
+  estimator = &quot;mc&quot;, #the MC-NNM estimator
+  #      EM = F, #
+  index = c(&quot;state_id&quot;,&quot;year&quot;), #time-unit
+  
+  #non-parametric bootstrap if MC-NNM estimator used
+  #inference = &quot;parametric&quot;, 
+  se = TRUE, 
+  
+  #perform a cross-validation procedure to 
+  #determine the number of unobserved factors
+  CV = TRUE, 
+
+  #the range of possible numbers of unobserved factors
+  r = c(0, 5), #
+  seed = 123, #arbitrary seed so same results every time
+  nboots = 2000, #number of bootstrap reps
+  force = &quot;two-way&quot;, 
+  parallel = TRUE
+)</code></pre>
+</div>
+<div id="examine-summary-output-returned-by-the-gsynth-function" class="section level2" number="3.3">
+<h2><span class="header-section-number">3.3</span> Examine summary output returned by the gsynth function</h2>
+<p>Return the average (unweighted) difference effect over all treated state-years and the corresponding standard error and confidence intervals.</p>
+<pre class="r"><code>gsynth_out_overall_sub_pol_mc_nnm$est.avg</code></pre>
+<pre><code>##          Estimate     S.E.  CI.lower CI.upper   p.value
+## ATT.avg -2.118079 2.163304 -6.358078 2.121919 0.3275332</code></pre>
+<p>These confidence intervals are calculated by adding 1.96<em>SE and -1.96</em>SE to either side of the estimate.</p>
+<pre class="r"><code>#qnorm(.975)#return the exact value
+#Estimate
+gsynth_out_overall_sub_pol_mc_nnm$est.avg[1]</code></pre>
+<pre><code>## [1] -2.118079</code></pre>
+<pre class="r"><code>#Upper limit
+gsynth_out_overall_sub_pol_mc_nnm$est.avg[1]+
+  gsynth_out_overall_sub_pol_mc_nnm$est.avg[2]*1.959964</code></pre>
+<pre><code>## [1] 2.121919</code></pre>
+<pre class="r"><code>#Lower limit
+gsynth_out_overall_sub_pol_mc_nnm$est.avg[1]-
+  gsynth_out_overall_sub_pol_mc_nnm$est.avg[2]*1.959964</code></pre>
+<pre><code>## [1] -6.358078</code></pre>
+<p>Another way to return the average treatment effect without the confidence intervals</p>
+<pre class="r"><code>gsynth_out_overall_sub_pol_mc_nnm$att.avg</code></pre>
+<pre><code>## [1] -2.118079</code></pre>
+<p>The average treatment effect at each time point can be returned by <code>gsynth_object$att</code>. These effect estimates are summarized over units where time is scaled to the treatment period for that unit. That is, 1 corresponds to the first treated year for each treated state, regardless of the calendar year.</p>
+<pre class="r"><code>gsynth_out_overall_sub_pol_mc_nnm$att</code></pre>
+<pre><code>##         -13         -12         -11         -10          -9          -8 
+## -0.26992263  0.38732901  0.26348340 -0.79655792 -1.01552488  0.23192784 
+##          -7          -6          -5          -4          -3          -2 
+##  0.08756312  0.14899219  0.23311709 -0.07675195 -0.03369085  0.30835163 
+##          -1           0           1           2           3           4 
+##  0.40214995  0.14395025 -3.94572630 -4.90217808 -0.48894728 -1.83082518 
+##           5           6 
+## -1.53387942  0.56269021</code></pre>
+</div>
+<div id="return-effect-estimates-for-every-treated-state-year" class="section level2" number="3.4">
+<h2><span class="header-section-number">3.4</span> Return effect estimates for every treated state-year</h2>
+<p>Using the effect estimates for every treated state-year, we can replicate the summary difference effects presented above.</p>
+<p>Here are the difference effects for all state-years. Note that “effects” are estimated for all state-years in the treated states, including pre-treatment years. Pre-treatment effects are the difference between the observed and predicted counterfactual outcomes before treatment.</p>
+<pre class="r"><code>gsynth_out_overall_sub_pol_mc_nnm$eff</code></pre>
+<pre><code>##                2           4           5           6           8            9
+## 2000  -2.8549609   0.9254919 -6.56021258  -6.3914770  -2.9607249   5.01758412
+## 2001   5.8785560  -2.8025061 -3.46542138  -9.7262748 -10.6700147   1.56284433
+## 2002  -0.3513856   3.3130764  5.35241334  -4.2376838   3.4085189   3.31272662
+## 2003  -0.3155085  -3.1909703 -9.84283260   2.9835159  -1.1003219  -1.01984959
+## 2004   0.5178832   1.2243677 -2.37844455   0.3360901   0.1558620  -0.15402197
+## 2005  -5.3910471   2.8557760  0.05381347   0.1484376  -0.5027154  -2.92327032
+## 2006  -9.3061276   3.6482257  5.60159505   6.3278789   0.8159762  -4.80527797
+## 2007 -13.9966886   2.6698943 -0.12056547   5.3221665   1.3100673  -1.99285818
+## 2008  -8.0616089  -3.8467589  5.45840980  -0.2389340   1.7882295  -0.05959601
+## 2009   2.2731099  -3.1360315 -4.39773648   1.2113080   5.3525481   0.83235292
+## 2010   9.6699464  -4.9302006  1.99157065   1.4377013  -0.4254949   0.93916143
+## 2011   4.1806033   1.5230066  6.41778331   0.6398288   3.8678738  -1.52598728
+## 2012   6.6324375   2.0246665  5.80748351   4.5018306   3.5084971   5.70294337
+## 2013   1.1994690  -0.4073624 -2.26575154  -1.2320234  -2.7471547  -4.53157237
+## 2014  12.4764326 -10.2414970 16.40508485  -8.8986156  -0.3509733 -13.46949116
+## 2015  11.7806796  -5.9121541  4.40407449 -10.7073366  -2.7536341 -15.30211467
+## 2016  10.6629440   2.5407575 14.36990400  -0.6185028   5.6350307 -15.82618933
+## 2017   2.7299284  -4.5502136 20.27686278  -3.7604160  -3.9764594 -14.49889136
+## 2018  11.5267968  -5.8068421 13.01575069  -4.0113799  -8.7816937  -9.97251318
+## 2019  14.0531558  -5.9749003 28.88296298  -4.6492172  -0.4304725 -11.75555220
+##                10          15          17         18          19           20
+## 2000  -1.81602305   8.0833229   1.9257576  2.3235016   0.1176644 -5.555199395
+## 2001   2.13907177  -5.0601838   3.6297837 -2.6650165  -4.8037043  2.217920042
+## 2002  -4.35112520   4.3777023   2.1085935 -3.9036759  -7.6005317 -0.915802086
+## 2003  -7.92495992  -3.9467320   0.1489462  0.6781281   2.6342882 -0.006407251
+## 2004   2.01941293  -0.6863185   0.2391470  4.0858052  -3.3363742  5.469241138
+## 2005  -0.45835661   1.6764130   0.6290714 -2.2168794  -1.1991227  3.413243076
+## 2006   4.73311789  -0.9313507  -4.2223637 -0.4899900   2.9689752 -0.978106611
+## 2007   4.08137468  -9.6010019  -1.3708982 -1.2385030  -1.1254830 -3.807699360
+## 2008   8.67188119   2.5259067   3.4691970  0.5785341  -2.2654531 -1.413289722
+## 2009   3.44429572   1.4708106  -0.4549505 -2.8616421   1.2561041 -2.850611758
+## 2010   0.07237734  -4.9620191  -0.1246502  2.3606650   5.7387897  0.746911783
+## 2011 -12.91829889   1.4193114  -0.1147696  1.4696709   1.1421687  1.697238737
+## 2012  -6.88068309   1.8411968  -4.1509112  4.8162724   2.7783652  4.608116170
+## 2013   7.89468907   4.2960914  -2.5491895  0.7139686   4.6177348 -1.502840268
+## 2014 -22.89346887  19.0004806 -11.6410006 -3.3863784 -10.4195965  5.991426220
+## 2015 -22.89838332   9.4663920 -14.7722243 -8.2851715 -15.3251365  7.786098766
+## 2016 -16.42311988 -12.5374204 -11.3011604  2.3463428   1.2881646  9.341081057
+## 2017 -11.29206388   8.4828745 -16.6572568 -2.0741844  -0.6877451  5.604985932
+## 2018 -21.13442854   4.5800173  -9.1374801  0.3032116   0.9905305  9.965214467
+## 2019 -23.44436702   5.6359251 -13.4046862  1.3658028  19.8335289  6.429658030
+##              21          22           23          24          25          26
+## 2000 -4.6294111  -1.7437083   0.07570525   2.7204380  -0.6990843  -0.0161745
+## 2001  6.4119219   2.6067579   6.69923992   0.6281304  -0.4088048  -3.3504597
+## 2002 -5.0860523  -6.1868444  -6.02419187  -2.9893821   2.9089778  -2.5980492
+## 2003  0.5004803   3.6138866  -1.15556061  -1.6482439   6.5289678   1.5007905
+## 2004 -1.9404038  -1.1781295  -5.84272521   4.6644422   4.4017002  -2.8865029
+## 2005  0.5737142   2.4002428   3.15175303   0.2256716  -3.3073082   4.1748908
+## 2006 -0.2055802   2.2460686   9.59173002   0.1218915  -2.1117501  -2.9027444
+## 2007 -4.0766510   0.9936110   3.68216281   1.3875399   2.9845796   3.3115265
+## 2008 -3.2261717   8.1203126  -0.75057774  -3.0707603  -1.3134053   0.6602714
+## 2009 -0.8405247  -0.0926782 -10.05108079   4.9282587   0.4090805  -1.0117059
+## 2010  1.3752575  -3.4818804  -5.42439483   2.9718065  -2.5460516  -0.6252006
+## 2011  2.3199656 -12.9166318   5.97492694  -4.9875114  -1.4695736   5.0311348
+## 2012  8.8105395   0.5373354  -0.36686424  -3.5569524  -1.1951496  -0.6589605
+## 2013  1.6694429   1.7842381  -3.20559413  -2.3161417  -4.0163692  -0.8177121
+## 2014  6.8212288   6.7992718  -1.26734251 -12.1052757 -10.2694142  -3.7923500
+## 2015 12.7207553  -3.9471131   8.21634494  -7.1830097 -12.1394040  -9.1702556
+## 2016 23.5383831   3.6295946   1.36876148  -5.0372080 -10.0868757   3.8551289
+## 2017 15.5653180   6.7371183  -1.84861304 -10.3177240 -11.1426868  -6.6989052
+## 2018 16.1854734  -4.3213319  -3.00867593  -5.0233898 -12.5516589  -7.1359537
+## 2019 19.4853982  -2.7256552  -6.19037815  -8.6562222 -10.0813651 -13.5660754
+##              27          30           32         33           34         35
+## 2000 -4.0048696  -1.3426304  -4.65485271   1.297806   3.49322602 -8.7826231
+## 2001 -0.1704084  -1.0810075   2.14520702   4.990289   1.89685211 -1.1569962
+## 2002 -2.0120038   4.5521697  -4.44486600   6.015901   1.83996172  3.6758075
+## 2003 -4.9673122   6.4480646  -1.11728952 -10.111013   0.70623219 -5.3882315
+## 2004  0.1339679 -10.5633307   1.44698982  -5.876708  -1.34815685 -6.9289465
+## 2005  2.9537924  -4.9570906  14.73236650  -4.786283   2.87606329  2.2905988
+## 2006 -1.6440201  -6.6824458   7.34860789   6.833601  -0.05237921 -3.2057401
+## 2007  1.0162709   7.9289953  -8.30998500   4.348816  -3.12345705  3.5031667
+## 2008  0.4591471   1.6399859  -5.22629959  -4.437997  -1.47227800  0.7100342
+## 2009  1.8882641   1.3506144   7.05149787   3.132310 -12.37021673  6.4353284
+## 2010  0.1269997   1.1665361  -4.22738418  -6.564625   6.54540853  4.3688844
+## 2011  1.7030661   2.4417498  -0.99729630  -1.901203   1.24024958  4.3837180
+## 2012  4.4449333  -0.2856542  -4.29067883   1.298751   1.08499560 -5.0201027
+## 2013  1.0497289   2.2230876  -0.07108479   5.590018  -1.33348534  6.6105782
+## 2014 -4.1888925  -5.1417667  -8.98697513 -11.272948  -7.67655067  3.1359613
+## 2015 -8.0823884   2.2432412  -2.12211379 -10.839888 -12.53180244 -5.7178546
+## 2016 -2.6465417  -4.0264410   0.90474778   4.272769  -8.07086934 21.6165209
+## 2017  0.9229848  -3.4163772 -12.80839412   1.648234  -7.25530872  7.0654661
+## 2018 -0.5146687  14.1233195 -15.25640221  10.693277  -6.43962457  6.6653689
+## 2019 -2.9910751   9.3273563  -7.47229206   6.713150  -9.11903698 23.2141307
+##               36          38           39           41         42          44
+## 2000   1.4980350  -0.7849287   2.72070183  -2.74410407  4.7260493  -8.7893744
+## 2001   2.2277692   8.5343622   2.15891822   0.19279412 -0.2558283   0.3017889
+## 2002   3.3868805   3.7200846   0.16329797   3.17342622  0.2748056  10.1671798
+## 2003  -1.8994282  -0.9878865  -5.94840869   3.99131946  0.5119358   1.4843829
+## 2004  -0.4386471  -2.9003550   1.14380012  -0.64099565 -1.2416699   5.9246401
+## 2005  -4.0692782 -13.8914755   0.09257012  -1.01699490  3.0248903  12.5212797
+## 2006   1.3508449   2.6358211   0.10715142   0.04729964 -0.2894381 -12.6922983
+## 2007   1.7391272  -1.1568271  -0.47011710   4.96863701  1.4617728   0.9401307
+## 2008   3.1639697   1.8887027   5.11960520  -1.10792700  1.3787021   2.6453143
+## 2009   2.7955844   5.2327818 -11.23860745   2.46069932  1.5827381  -1.1426075
+## 2010   0.9548831   1.2728407   2.39731545  -6.91189540  0.4103455  -9.1348055
+## 2011  -2.8668582  -9.2538635  -1.12805468  -2.02654500  3.7307358   1.7752254
+## 2012  -2.1615826   4.3282893   2.08242672  -0.31258942 -5.8830510  -3.3541590
+## 2013  -6.7585549   1.8432708   2.26863503  -0.39629928 -2.9168291   0.7092182
+## 2014 -11.7479432  11.0310816  -3.72879683  -8.85201412 -7.9378003  -8.1255893
+## 2015 -15.8285250   1.5682665  -5.34896552  -6.75804086 -8.7787923 -13.1770728
+## 2016  -8.9845593  -6.9688493   1.43973387  -7.60298008 -5.1766789 -24.4935331
+## 2017 -14.9863614  -3.6408701   1.40894744  -3.58769597 -6.9289439 -15.4903265
+## 2018 -13.5788328 -10.1648103   2.92951948 -11.07381110 -4.5559510  -6.9201632
+## 2019 -13.1826499   9.3520661   3.44603107  -8.14339630 -5.8061284 -12.2986461
+##              50          51          53         54
+## 2000  9.3334980  3.52262819 -2.51466703   7.082314
+## 2001 -7.5470297  3.76949417  0.68184390   7.907938
+## 2002 -6.5770902  0.16162444 -1.02277580   1.651880
+## 2003 -1.9011750 -3.77901751  4.39397664   4.535699
+## 2004 -5.1006728  5.14870161  2.07462053 -13.245792
+## 2005 -5.2770927  3.03572786 -0.67048990   3.057515
+## 2006  0.6724051 -0.96986954 -4.55335693  -2.637055
+## 2007 -0.2832529 -0.59788780  2.21108611   5.607797
+## 2008  5.8980325  4.45490136  4.17312190  -4.072115
+## 2009  0.3522267  3.17070597 -2.44856779  -6.761062
+## 2010  4.8594316  0.30006093  1.47493946  -7.671514
+## 2011  6.8838652 -1.25602873 -2.04069510   2.261032
+## 2012 -7.2772523  0.31565145 -1.85751154   3.007931
+## 2013  5.3846361 -2.42812390  0.02122725  -2.535492
+## 2014  2.0799530 -4.90912715 -3.90396235 -10.993697
+## 2015 11.1466987 -8.14496292 -9.25678926  -9.288240
+## 2016 25.5202676 -1.53260149 -4.13516149   1.235381
+## 2017 12.7525180 -0.24683486 -3.50708670  -1.331951
+## 2018 15.5950791 -0.01963506 -3.36883864  14.623048
+## 2019 25.5960077 -3.19034963 -3.27040641  15.044138</code></pre>
+</div>
 </div>
 
 

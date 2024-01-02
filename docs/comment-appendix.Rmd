@@ -61,7 +61,7 @@ load("lookup_state_abb_geo_simplify_shift_al_hi.RData")
 In this section, I explore Medicaid expansion status by missingness status in the demographic groups.
 
 ### Medicaid expansion (all states, 2019)
-This map shows Medicaid expansion status over all states in 2019.
+This map shows Medicaid expansion status of states in 2019.
 ```{r,eval=T, echo=F, warning=FALSE, message=F}
 overall %>%
   filter(year==2019) %>% 
@@ -384,8 +384,107 @@ In analyses as presented in Scenarios 2-5 in the main text, I applied the vote s
 
 
 # Use state-year effect estimates from the gsynth function to calculate summary measures of effect
-In this section, I demonstrate the state-year effect estimates can be used to calculate various summary measures, including ratios, and differences, and weighted versions.
+In this section, I use state-year effect estimates to calculate the summary measures of effect in the main text's table.
+
+This code will populate values for Scenario 5 in the table in which we used the MC-. Code for the other analyses can be found here:
+gsynth-nianogo-et-al/scripts/gsynth-analyses-to-post.R
+
+## Load the data
+```{r, eval=F, echo=T,warning=FALSE, message=F}
+source(here("scripts", "read-wrangle-data-acs.R"))
+source(here("scripts", "read-wrangle-data-pres-election.R"))
+source(here("scripts", "read-wrangle-data-nianogo-et-al.R"))
+```
+
+```{r, eval=T, echo=F,warning=FALSE, message=F}
+#Load the gsynth output in the background
+setwd(here("data","data-processed"))
+load("gsynth_out_overall_sub_pol_mc_nnm.RData")
+```
+
+## Run the gsynth function
+
+Here, I will summarize effects estimated by the MC-NNM estimator as presented in Scenario 5 of the table in the text.
+Also see
+https://yiqingxu.org/packages/gsynth/articles/tutorial.html#matrix-completion
+
+```{r, eval=F, echo=T,warning=FALSE, message=F}
+gsynth_out_overall_sub_pol_mc_nnm=gsynth(
+  #outcome ~ treatment indicator+ covariates
+  cvd_death_rate ~ treatedpost + 
+    primarycare_rate +
+    cardio_rate + 
+    population_overall + 
+    low_educ_overall + 
+    married_overall+ 
+    employed_for_wages_overall + 
+    vote_share_dem+#popular vote data
+    low_income_overall + 
+    male_overall + 
+    race_nonwhite_overall
+  ,
+
+  #dataset in which the effects are estimated
+  data = overall_covars_alt,
+  estimator = "mc", #the MC-NNM estimator
+  #      EM = F, #
+  index = c("state_id","year"), #time-unit
+  
+  #non-parametric bootstrap if MC-NNM estimator used
+  #inference = "parametric", 
+  se = TRUE, 
+  
+  #perform a cross-validation procedure to 
+  #determine the number of unobserved factors
+  CV = TRUE, 
+
+  #the range of possible numbers of unobserved factors
+  r = c(0, 5), #
+  seed = 123, #arbitrary seed so same results every time
+  nboots = 2000, #number of bootstrap reps
+  force = "two-way", 
+  parallel = TRUE
+)
+```
 
 
+## Examine summary output returned by the gsynth function
+Return the average (unweighted) difference effect over all treated state-years and the corresponding standard error and confidence intervals.
+```{r}
+gsynth_out_overall_sub_pol_mc_nnm$est.avg
+```
+
+These confidence intervals are calculated by adding 1.96*SE and -1.96*SE to either side of the estimate.
+```{r}
+#qnorm(.975)#return the exact value
+#Estimate
+gsynth_out_overall_sub_pol_mc_nnm$est.avg[1]
+
+#Upper limit
+gsynth_out_overall_sub_pol_mc_nnm$est.avg[1]+
+  gsynth_out_overall_sub_pol_mc_nnm$est.avg[2]*1.959964
+
+#Lower limit
+gsynth_out_overall_sub_pol_mc_nnm$est.avg[1]-
+  gsynth_out_overall_sub_pol_mc_nnm$est.avg[2]*1.959964
+```
+
+Another way to return the average treatment effect without the confidence intervals
+```{r}
+gsynth_out_overall_sub_pol_mc_nnm$att.avg
+```
+
+The average treatment effect at each time point can be returned by `gsynth_object$att`. These effect estimates are summarized over units where time is scaled to the treatment period for that unit. That is, 1 corresponds to the first treated year for each treated state, regardless of the calendar year.
+```{r}
+gsynth_out_overall_sub_pol_mc_nnm$att
+```
+
+## Return effect estimates for every treated state-year
+Using the effect estimates for every treated state-year, we can replicate the summary difference effects presented above.
+
+Here are the difference effects for all state-years. Note that "effects" are estimated for all state-years in the treated states, including pre-treatment years. Pre-treatment effects are the difference between the observed and predicted counterfactual outcomes before treatment.
+```{r}
+gsynth_out_overall_sub_pol_mc_nnm$eff
+```
 
 
