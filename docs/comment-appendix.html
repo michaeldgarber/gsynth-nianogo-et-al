@@ -363,6 +363,15 @@ div.tocify {
 <pre class="r"><code>source(here(&quot;scripts&quot;, &quot;read-wrangle-data-acs.R&quot;))
 source(here(&quot;scripts&quot;, &quot;read-wrangle-data-pres-election.R&quot;))
 source(here(&quot;scripts&quot;, &quot;read-wrangle-data-nianogo-et-al.R&quot;))</code></pre>
+<p>Packages used</p>
+<pre class="r"><code>library(here)
+library(tidyverse)
+library(mapview) #for interactive mapping
+library(tmap) #static mapping
+library(sf) #managing spatial data
+library(gsynth) #to run the generalized synthetic control method
+library(RColorBrewer) #for creating color palettes
+library(viridis) #more color palettes</code></pre>
 </div>
 <div id="exploring-data" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Exploring data</h1>
@@ -700,8 +709,8 @@ gsynth_out_overall_sub_pol_mc_nnm$est.avg[1]-
 ## -1.53387942  0.56269021</code></pre>
 </div>
 </div>
-<div id="calculate-unweighted-average-difference-effect-by-summarizing-effect-estimates-in-every-treated-state-year" class="section level2" number="3.4">
-<h2><span class="header-section-number">3.4</span> Calculate unweighted average difference effect by summarizing effect estimates in every treated state-year</h2>
+<div id="calculate-unweighted-average-difference-effect-by-summarizing-effect-estimates-over-treated-state-years" class="section level2" number="3.4">
+<h2><span class="header-section-number">3.4</span> Calculate unweighted average difference effect by summarizing effect estimates over treated state-years</h2>
 <div id="return-effect-estimates-for-every-treated-state-year" class="section level3" number="3.4.1">
 <h3><span class="header-section-number">3.4.1</span> Return effect estimates for every treated state-year</h3>
 <p>Using the effect estimates for every treated state-year, we can replicate the summary difference effects presented above. Effect estimates for every treated state-year are returned by <code>gsynth_objecct$eff</code>.</p>
@@ -1200,7 +1209,7 @@ state_year_wts_overall %&gt;%
   theme_bw()</code></pre>
 <pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
 <p><img src="comment-appendix_files/figure-html/unnamed-chunk-55-1.png" width="672" /></p>
-<p>Each observation in this dataset of weights is a state-year. Note that the weights add up to 1 over treated state-years.</p>
+<p>Each observation in this dataset of weights is a state-year. The weights add up to 1 over treated state-years.</p>
 <pre class="r"><code>state_year_wts_overall</code></pre>
 <pre><code>## # A tibble: 187 × 4
 ##    state_id  year pop_tot_all_treated_years prop_of_tot_pop_year
@@ -1225,8 +1234,6 @@ state_year_wts_overall %&gt;%
 ##   &lt;dbl&gt;                &lt;dbl&gt;
 ## 1     1                 1.00</code></pre>
 <p>Here’s a map of the weights in 2019. In a given year, they do not sum to 1 because they sum to 1 over all treated state-years.</p>
-<pre class="r"><code>library(viridis)</code></pre>
-<pre><code>## Loading required package: viridisLite</code></pre>
 <pre class="r"><code>setwd(here(&quot;data&quot;,&quot;data-processed&quot;))
 load(&quot;lookup_state_id_state_abb.RData&quot;)
 state_year_wts_overall_2019=state_year_wts_overall %&gt;% 
@@ -1344,7 +1351,81 @@ lookup_state_abb_geo_simplify_shift_al_hi %&gt;%
 </tr>
 </tbody>
 </table>
-<p>Confidence intervals can be calculated analogously, first calculating these measures in every bootstrap replicate and then taking the percentiles over replicates.</p>
+<p>Confidence intervals can be calculated analogously, first calculating the above measures in every bootstrap replicate and then taking the percentiles over replicates.</p>
+<pre class="r"><code>tib_eff_boot_mc_nnm %&gt;% 
+  left_join(tib_mc_nnm,by=c(&quot;state_id&quot;,&quot;year&quot;)) %&gt;% #link in the data just above
+  left_join(state_year_wts_overall,by=c(&quot;state_id&quot;,&quot;year&quot;)) %&gt;% 
+  filter(treatedpost==1) %&gt;% #limit to treated observations
+  mutate(
+    y_ct_boot=y_tr_pt-diff_boot #counterfactual estimate - bootstrap
+  ) %&gt;% 
+  #calculate weighted averages in each replicate
+  group_by(boot_rep, treatedpost) %&gt;%
+  summarise(
+    
+      #mean of the counterfactual estimate in the bootstrap rep
+      #Unweighted
+      y_ct_boot_mean_wt=weighted.mean(
+        x=y_ct_boot,
+        w=prop_of_tot_pop_year,
+        na.rm=T),
+      
+      #calculate this again (doesn&#39;t change between reps)
+      y_tr_pt_mean_wt=weighted.mean(
+        x=y_tr_pt,
+        w=prop_of_tot_pop_year,
+        na.rm=T)
+  ) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(
+    #weighted differences and ratios in each replicate
+    ratio_boot_mean_wt=y_tr_pt_mean_wt/y_ct_boot_mean_wt,
+    diff_boot_mean_wt=y_tr_pt_mean_wt-y_ct_boot_mean_wt
+  ) %&gt;% 
+  #Find percentiles over replicates
+  group_by(treatedpost) %&gt;% 
+  summarise(
+      diff_pt_wt_ll=quantile(diff_boot_mean_wt, probs=0.025, na.rm=TRUE),
+      diff_pt_wt_ul=quantile(diff_boot_mean_wt,probs=.975,na.rm=TRUE),
+      
+      ratio_pt_wt_ll=quantile(ratio_boot_mean_wt, probs=0.025, na.rm=TRUE),
+      ratio_pt_wt_ul=quantile(ratio_boot_mean_wt,probs=.975,na.rm=TRUE)
+
+  ) %&gt;% 
+  ungroup() %&gt;% 
+  knitr::kable(
+    caption=&quot;95% CI for weighted average treatment effects in treated&quot;,
+    digits=2)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;boot_rep&#39;. You can override using the
+## `.groups` argument.</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-60">Table 3.2: </span>95% CI for weighted average treatment effects in treated</caption>
+<colgroup>
+<col width="17%" />
+<col width="20%" />
+<col width="20%" />
+<col width="21%" />
+<col width="21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">treatedpost</th>
+<th align="right">diff_pt_wt_ll</th>
+<th align="right">diff_pt_wt_ul</th>
+<th align="right">ratio_pt_wt_ll</th>
+<th align="right">ratio_pt_wt_ul</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">-7.65</td>
+<td align="right">2.81</td>
+<td align="right">0.95</td>
+<td align="right">1.02</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>

@@ -9,15 +9,6 @@ output:
     toc_depth: 4
 ---
 
-```{r,eval=T, echo=F,warning=FALSE, message=F}
-library(here)
-library(tidyverse)
-library(mapview) #for interactive mapping
-library(tmap) #static mapping
-library(sf) #for managing spatial data
-library(gsynth) #to run the generalized synthetic control method
-library(RColorBrewer) #for creating color palettes
-```
 
 # Introduction
 This appendix contains supporting information and code related to my comment on Nianogo et al.'s article.
@@ -37,6 +28,18 @@ Those scripts can be run in the following order:
 source(here("scripts", "read-wrangle-data-acs.R"))
 source(here("scripts", "read-wrangle-data-pres-election.R"))
 source(here("scripts", "read-wrangle-data-nianogo-et-al.R"))
+```
+
+Packages used
+```{r,eval=T, echo=T, warning=FALSE, message=F}
+library(here)
+library(tidyverse)
+library(mapview) #for interactive mapping
+library(tmap) #static mapping
+library(sf) #managing spatial data
+library(gsynth) #to run the generalized synthetic control method
+library(RColorBrewer) #for creating color palettes
+library(viridis) #more color palettes
 ```
 
 
@@ -486,7 +489,7 @@ The average treatment effect at each time point can be returned by `gsynth_objec
 gsynth_out_overall_sub_pol_mc_nnm$att
 ```
 
-## Calculate unweighted average difference effect by summarizing effect estimates in every treated state-year
+## Calculate unweighted average difference effect by summarizing effect estimates over treated state-years
 
 
 ### Return effect estimates for every treated state-year
@@ -835,7 +838,7 @@ state_year_wts_overall %>%
   theme_bw()
 ```
 
-Each observation in this dataset of weights is a state-year. Note that the weights add up to 1 over treated state-years.
+Each observation in this dataset of weights is a state-year. The weights add up to 1 over treated state-years.
 ```{r}
 state_year_wts_overall
 state_year_wts_overall %>% 
@@ -846,7 +849,6 @@ state_year_wts_overall %>%
 
 Here's a map of the weights in 2019. In a given year, they do not sum to 1 because they sum to 1 over all treated state-years.
 ```{r}
-library(viridis)
 setwd(here("data","data-processed"))
 load("lookup_state_id_state_abb.RData")
 state_year_wts_overall_2019=state_year_wts_overall %>% 
@@ -943,7 +945,53 @@ tib_mc_nnm %>%
     digits=2)
 ```
 
-Confidence intervals can be calculated analogously, first calculating these measures in every bootstrap replicate and then taking the percentiles over replicates.
+Confidence intervals can be calculated analogously, first calculating the above measures in every bootstrap replicate and then taking the percentiles over replicates.
+```{r}
+tib_eff_boot_mc_nnm %>% 
+  left_join(tib_mc_nnm,by=c("state_id","year")) %>% #link in the data just above
+  left_join(state_year_wts_overall,by=c("state_id","year")) %>% 
+  filter(treatedpost==1) %>% #limit to treated observations
+  mutate(
+    y_ct_boot=y_tr_pt-diff_boot #counterfactual estimate - bootstrap
+  ) %>% 
+  #calculate weighted averages in each replicate
+  group_by(boot_rep, treatedpost) %>%
+  summarise(
+    
+      #mean of the counterfactual estimate in the bootstrap rep
+      #Unweighted
+      y_ct_boot_mean_wt=weighted.mean(
+        x=y_ct_boot,
+        w=prop_of_tot_pop_year,
+        na.rm=T),
+      
+      #calculate this again (doesn't change between reps)
+      y_tr_pt_mean_wt=weighted.mean(
+        x=y_tr_pt,
+        w=prop_of_tot_pop_year,
+        na.rm=T)
+  ) %>% 
+  ungroup() %>% 
+  mutate(
+    #weighted differences and ratios in each replicate
+    ratio_boot_mean_wt=y_tr_pt_mean_wt/y_ct_boot_mean_wt,
+    diff_boot_mean_wt=y_tr_pt_mean_wt-y_ct_boot_mean_wt
+  ) %>% 
+  #Find percentiles over replicates
+  group_by(treatedpost) %>% 
+  summarise(
+      diff_pt_wt_ll=quantile(diff_boot_mean_wt, probs=0.025, na.rm=TRUE),
+      diff_pt_wt_ul=quantile(diff_boot_mean_wt,probs=.975,na.rm=TRUE),
+      
+      ratio_pt_wt_ll=quantile(ratio_boot_mean_wt, probs=0.025, na.rm=TRUE),
+      ratio_pt_wt_ul=quantile(ratio_boot_mean_wt,probs=.975,na.rm=TRUE)
+
+  ) %>% 
+  ungroup() %>% 
+  knitr::kable(
+    caption="95% CIs for weighted average treatment effects in treated",
+    digits=2)
+```
 
 
 
