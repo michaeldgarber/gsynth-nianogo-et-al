@@ -11,7 +11,7 @@
 
 <meta name="author" content="Michael D. Garber" />
 
-<meta name="date" content="2024-01-02" />
+<meta name="date" content="2024-01-03" />
 
 <title>Appendix for comment on Nianogo et al.</title>
 
@@ -345,7 +345,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Appendix for comment on Nianogo et al.</h1>
 <h4 class="author">Michael D. Garber</h4>
-<h4 class="date">2024-01-02</h4>
+<h4 class="date">2024-01-03</h4>
 
 </div>
 
@@ -507,25 +507,27 @@ source(here(&quot;scripts&quot;, &quot;read-wrangle-data-nianogo-et-al.R&quot;))
 </div>
 <div id="low-education" class="section level3" number="2.2.3">
 <h3><span class="header-section-number">2.2.3</span> Low education</h3>
-<p>No high-school degree
-#### All adults aged 45-64</p>
+<p>No high-school degree</p>
+<div id="all-adults-aged-45-64-2" class="section level4" number="2.2.3.1">
+<h4><span class="header-section-number">2.2.3.1</span> All adults aged 45-64</h4>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ## 0.01872 0.04614 0.06653 0.07496 0.09833 0.23663</code></pre>
 <p><img src="comment-appendix_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
-<div id="hispanic-adults-aged-45-64-2" class="section level4" number="2.2.3.1">
-<h4><span class="header-section-number">2.2.3.1</span> Hispanic adults aged 45-64</h4>
+</div>
+<div id="hispanic-adults-aged-45-64-2" class="section level4" number="2.2.3.2">
+<h4><span class="header-section-number">2.2.3.2</span> Hispanic adults aged 45-64</h4>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##  0.0000  0.1780  0.2650  0.2611  0.3486  0.5547</code></pre>
 <p><img src="comment-appendix_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 </div>
-<div id="black-adults-aged-45-64-2" class="section level4" number="2.2.3.2">
-<h4><span class="header-section-number">2.2.3.2</span> Black adults aged 45-64</h4>
+<div id="black-adults-aged-45-64-2" class="section level4" number="2.2.3.3">
+<h4><span class="header-section-number">2.2.3.3</span> Black adults aged 45-64</h4>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ## 0.00000 0.08062 0.11265 0.11936 0.15205 0.50000</code></pre>
 <p><img src="comment-appendix_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
 </div>
-<div id="white-adults-aged-45-64-2" class="section level4" number="2.2.3.3">
-<h4><span class="header-section-number">2.2.3.3</span> White adults aged 45-64</h4>
+<div id="white-adults-aged-45-64-2" class="section level4" number="2.2.3.4">
+<h4><span class="header-section-number">2.2.3.4</span> White adults aged 45-64</h4>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##  0.0000  0.1250  0.2268  0.2318  0.3333  0.6400</code></pre>
 <p><img src="comment-appendix_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
@@ -533,7 +535,7 @@ source(here(&quot;scripts&quot;, &quot;read-wrangle-data-nianogo-et-al.R&quot;))
 </div>
 <div id="married" class="section level3" number="2.2.4">
 <h3><span class="header-section-number">2.2.4</span> Married</h3>
-<div id="all-adults-aged-45-64-2" class="section level4" number="2.2.4.1">
+<div id="all-adults-aged-45-64-3" class="section level4" number="2.2.4.1">
 <h4><span class="header-section-number">2.2.4.1</span> All adults aged 45-64</h4>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##  0.5029  0.5849  0.6104  0.6137  0.6385  0.7633</code></pre>
@@ -841,7 +843,7 @@ gsynth_out_overall_sub_pol_mc_nnm$est.avg[1]-
 <li>diff_eff_by_state_year: difference effects by state-year</li>
 <li>mc_nnm: to indicate which gsynth model it corresponds to</li>
 </ul>
-<p>Also note that these results are among the total population, not in a demographic subgroup.</p>
+<p>Also note that these results are among the total population (“overall”), not a particular demographic subgroup.</p>
 <pre class="r"><code>tib_diff_eff_by_state_year_mc_nnm=gsynth_out_overall_sub_pol_mc_nnm$eff %&gt;% 
   as_tibble() %&gt;% #Convert to tibble
   mutate(year=row_number()+1999)  %&gt;% #Add 1999 to row number to calculate year
@@ -1081,7 +1083,7 @@ tib_mc_nnm</code></pre>
 <pre class="r"><code>summary(tib_mc_nnm$diff_pt_check)</code></pre>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##       0       0       0       0       0       0</code></pre>
-<p>Okay, now we can calculate average ratio effects in the treated over treated state-years. Note that we are not simply summarizing the state-year ratio effects as the arithmetic mean of ratios is not generally the same as the ratio of arithmetic means. We can find the summary ratio effect by finding the mean of treated counterfactual outcomes in the treated state-years and the mean of observed outcomes in the treated state-years and then taking the ratio of the two means.</p>
+<p>We can now calculate average ratio effects in the treated over treated state-years. The ratio effect estimand of interest is the mean of the observed outcome in the treated divided by the mean of the countefactual outcome in the treated. In general, the arithmetic mean of ratios is not generally the same as the ratio of arithmetic means, so we should not take the arithmetic mean of the state-year ratio effects, We can find the summary ratio effect by finding the mean of treated counterfactual outcomes in the treated state-years and the mean of observed outcomes in the treated state-years and then taking the ratio of those two means.</p>
 <pre class="r"><code>ratio_pt_mc_nnm=tib_mc_nnm %&gt;% 
   filter(treatedpost==1) %&gt;% 
   group_by(treatedpost) %&gt;% 
@@ -1181,7 +1183,169 @@ pre_tx_fit_mc_nnm=tib_mc_nnm %&gt;%
 </div>
 <div id="weighted-average-treatment-effects" class="section level2" number="3.7">
 <h2><span class="header-section-number">3.7</span> Weighted average treatment effects</h2>
-<p>To do</p>
+<p>When considering the overall population-level effect of the policy, it may be desirable to weight states proportional to their share of that total population (or, more precisely, person-time as there is a temporal component). In this section, I calculate a weighted-average treatment effect, weighting each treated state-year’s effect estimate by its share of treated person time.</p>
+<div id="exploring-weights" class="section level3" number="3.7.1">
+<h3><span class="header-section-number">3.7.1</span> Exploring weights</h3>
+<p>The weights for a given state-year are that state-year’s proportion of the total treated person-years among adults aged 45-64 (variable name: <code>prop_of_tot_pop_year</code>). I gathered state-year populations of adults aged 45-64 from the American Community Survey. These scripts have more details on that:</p>
+<ul>
+<li>scripts/read-wrangle-data-acs.R</li>
+<li>scripts/read-wrangle-data-nianogo-et-al.R</li>
+</ul>
+<p>Here a histogram of the weights in the treated state-years.</p>
+<pre class="r"><code>setwd(here(&quot;data&quot;,&quot;data-processed&quot;))
+load(&quot;state_year_wts_overall.RData&quot;)
+state_year_wts_overall %&gt;% 
+  ggplot(aes(prop_of_tot_pop_year))+
+  geom_histogram()+
+  theme_bw()</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="comment-appendix_files/figure-html/unnamed-chunk-55-1.png" width="672" /></p>
+<p>Each observation in this dataset of weights is a state-year. Note that the weights add up to 1 over treated state-years.</p>
+<pre class="r"><code>state_year_wts_overall</code></pre>
+<pre><code>## # A tibble: 187 × 4
+##    state_id  year pop_tot_all_treated_years prop_of_tot_pop_year
+##       &lt;dbl&gt; &lt;dbl&gt;                     &lt;dbl&gt;                &lt;dbl&gt;
+##  1        4  2014                 309495338             0.00527 
+##  2        5  2014                 309495338             0.00242 
+##  3        6  2014                 309495338             0.0315  
+##  4        8  2014                 309495338             0.00446 
+##  5        9  2014                 309495338             0.00335 
+##  6       10  2014                 309495338             0.000817
+##  7       15  2014                 309495338             0.00116 
+##  8       17  2014                 309495338             0.0110  
+##  9       19  2014                 309495338             0.00264 
+## 10       20  2014                 309495338             0.00235 
+## # ℹ 177 more rows</code></pre>
+<pre class="r"><code>state_year_wts_overall %&gt;% 
+  mutate(dummy=1) %&gt;% 
+  group_by(dummy) %&gt;% 
+  summarise(prop_of_tot_pop_year=sum(prop_of_tot_pop_year))</code></pre>
+<pre><code>## # A tibble: 1 × 2
+##   dummy prop_of_tot_pop_year
+##   &lt;dbl&gt;                &lt;dbl&gt;
+## 1     1                 1.00</code></pre>
+<p>Here’s a map of the weights in 2019. In a given year, they do not sum to 1 because they sum to 1 over all treated state-years.</p>
+<pre class="r"><code>library(viridis)</code></pre>
+<pre><code>## Loading required package: viridisLite</code></pre>
+<pre class="r"><code>setwd(here(&quot;data&quot;,&quot;data-processed&quot;))
+load(&quot;lookup_state_id_state_abb.RData&quot;)
+state_year_wts_overall_2019=state_year_wts_overall %&gt;% 
+  filter(year==2019)
+lookup_state_abb_geo_simplify_shift_al_hi %&gt;% 
+  left_join(lookup_state_id_state_abb,by=&quot;state_abb&quot;) %&gt;% 
+  left_join(state_year_wts_overall_2019,by=&quot;state_id&quot;) %&gt;% 
+  tm_shape()+
+  tm_fill(
+        &quot;prop_of_tot_pop_year&quot;,
+        palette =viridis(n=5),
+  title=&quot;Share of person-years&quot;)+
+  tm_borders(col=&quot;black&quot;,alpha=1)+
+    tm_layout(
+    frame=F,
+#    legend.title.size=.5,
+    legend.outside=T,
+    legend.outside.position=&quot;bottom&quot;
+    )</code></pre>
+<p><img src="comment-appendix_files/figure-html/unnamed-chunk-57-1.png" width="672" /></p>
+<p>The same map in 2014. There are fewer states with non-missing data in this map because fewer states had expanded Medicaid in 2014.</p>
+<pre class="r"><code>setwd(here(&quot;data&quot;,&quot;data-processed&quot;))
+load(&quot;lookup_state_id_state_abb.RData&quot;)
+state_year_wts_overall_2014=state_year_wts_overall %&gt;% 
+  filter(year==2014)
+lookup_state_abb_geo_simplify_shift_al_hi %&gt;% 
+  left_join(lookup_state_id_state_abb,by=&quot;state_abb&quot;) %&gt;% 
+  left_join(state_year_wts_overall_2014,by=&quot;state_id&quot;) %&gt;% 
+  tm_shape()+
+  tm_fill(
+        &quot;prop_of_tot_pop_year&quot;,
+        palette =viridis(n=5),
+  title=&quot;Share of person-years&quot;)+
+  tm_borders(col=&quot;black&quot;,alpha=1)+
+    tm_layout(
+    frame=F,
+#    legend.title.size=.5,
+    legend.outside=T,
+    legend.outside.position=&quot;bottom&quot;
+    )</code></pre>
+<p><img src="comment-appendix_files/figure-html/unnamed-chunk-58-1.png" width="672" /></p>
+</div>
+<div id="weighting-effect-estimates" class="section level3" number="3.7.2">
+<h3><span class="header-section-number">3.7.2</span> Weighting effect estimates</h3>
+<p>We can use these weights to weight each treated year’s effect estimate to calculate a weighted average treatment effect.</p>
+<p>Work from the <code>tib_mc_nnm</code> tibble created above, which contains the following for each state-year estimated by the MC-NNM estimator:
+* counterfactual outcome
+* observed outcome
+* estimated difference effect
+* estimated ratio effect
+* treatment status indicator</p>
+<p>To this dataset, we will add the weights (<code>prop_of_tot_pop_year</code>, described above), joining by year and state identifier. To calculate the weighted-mean difference effect, we can take the weighted average of the constituent difference effects over treatment status (<code>treatedpost</code>) using base R’s <code>weighted.mean()</code> function.</p>
+<p>To calculate the weighted ratio effect, we first calculate weighted-average counterfactual and observed outcomes and then take the ratio of those.</p>
+<pre class="r"><code>tib_mc_nnm %&gt;% 
+  left_join(state_year_wts_overall,by=c(&quot;state_id&quot;,&quot;year&quot;)) %&gt;% 
+  filter(treatedpost==1) %&gt;% 
+  group_by(treatedpost) %&gt;% 
+  summarise(
+    
+    #weighted mean difference effect
+    diff_pt_mean_wt=weighted.mean(
+      x=diff_pt,
+      w=prop_of_tot_pop_year,#proportion of total population-years
+      na.rm=T),
+    
+    #unweighted mean difference effect for comparison
+    diff_pt_mean_unwt=mean(diff_pt,na.rm=T), 
+
+    #weighted average observed outcome
+      y_tr_pt_mean_wt=weighted.mean(
+        x=y_tr_pt,
+        w=prop_of_tot_pop_year, 
+        na.rm=T),
+    
+    #weighted average counterfactual outcome
+    y_ct_pt_mean_wt=weighted.mean(
+        x=y_ct_pt,
+        w=prop_of_tot_pop_year, 
+        na.rm=T)
+    ) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(
+    #Calculate ratio of the weighted observed outcome to weighted counterfactual outcome
+    ratio_pt_mean_wt=y_tr_pt_mean_wt/y_ct_pt_mean_wt
+  ) %&gt;% 
+  dplyr::select(-starts_with(&quot;treated&quot;)) %&gt;% #remove this column for space
+  knitr::kable(
+    caption=&quot;Weighted average treatment effects in treated&quot;,
+    digits=2)</code></pre>
+<table style="width:100%;">
+<caption><span id="tab:unnamed-chunk-59">Table 3.1: </span>Weighted average treatment effects in treated</caption>
+<colgroup>
+<col width="19%" />
+<col width="21%" />
+<col width="19%" />
+<col width="19%" />
+<col width="20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">diff_pt_mean_wt</th>
+<th align="right">diff_pt_mean_unwt</th>
+<th align="right">y_tr_pt_mean_wt</th>
+<th align="right">y_ct_pt_mean_wt</th>
+<th align="right">ratio_pt_mean_wt</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">-5.22</td>
+<td align="right">-2.12</td>
+<td align="right">140.14</td>
+<td align="right">145.36</td>
+<td align="right">0.96</td>
+</tr>
+</tbody>
+</table>
+<p>Confidence intervals can be calculated analogously, first calculating these measures in every bootstrap replicate and then taking the percentiles over replicates.</p>
+</div>
 </div>
 </div>
 <div id="support-of-miscellaneous-statements-from-text" class="section level1" number="4">
