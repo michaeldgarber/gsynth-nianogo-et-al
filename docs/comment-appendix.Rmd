@@ -995,15 +995,86 @@ tib_eff_boot_mc_nnm %>%
 
 
 
-# Support of miscellaneous statements from text
-To do
+# Support for in-text statements
+This section includes supporting information for some statements that I made in the text.
 
-## Negative predicted counterfactual outomes
-I stated in the main text that the minimum pre- dicted value of the counterfactual outcome in the treatment period over the replicates for the Hispanic population in Scenario 2 was −6091 CVD deaths per 100,000 adults.
+## Negative predicted counterfactual outomes in some groups
+I stated the following in the main text: "the minimum predicted value of the counterfactual outcome in the treatment period over the replicates for the Hispanic population in Scenario 2 was −6091 CVD deaths per 100,000 adults."
 
-The below code shows that:
+The gsynth model output for the Hispanic population under Scenario 2 is created here:
+gsynth-nianogo-et-al/scripts/gsynth-analyses-to-post.R
+
+I'm loading its cleaned-up output here
+```{r}
+setwd(here("data","data-processed"))
+load("gsynth_out_tib_hispanic_sub_pol.RData")
+```
+
+Below is the distribution of the predicted counterfactual outcomes. The minimum value is below zero, which is not plausible for a mortality rate.
+```{r}
+summary(gsynth_out_tib_hispanic_sub_pol$y_ct_boot)
+gsynth_out_tib_hispanic_sub_pol %>% 
+  ggplot(aes(x=y_ct_boot))+
+  geom_histogram()+
+  theme_bw()
+```
 
 
 ## Implausible demographic values
+In the main text, I also noted that there were implausible values in age-group-race subgroups. I stated that, "in one state-year, the data state that 100% of Hispanic adults aged 45 to 64 years were men, while in another state-year, 0% were."
+
+The histograms in the sub-section titled "Exploring data">"Distribution of BRFSS covariates">"Proportion men" shows that data. Copied here:
+
+```{r,eval=T, echo=F, warning=FALSE, message=F}
+summary(hispanic_complete$male)
+hispanic_complete %>% 
+  ggplot(aes(x=male))+
+  geom_histogram()+
+  theme_bw()
+```
+
+## State-by-state share of total person-years of adults aged 45-64
+In the text, I stated, "Considering the total population of adults aged 45 to 64 years, for example, there were 309,495,338 person-years over all treated states and years. California contributed the largest share (19.1%) to this total. Considering Black adults in this age range, the state of New York contributed the largest share (15.8%) of the 29,839,638 total treated person-years available for analysis."
+
+Total person-years of adults aged 45-64 over all treated states and years
+```{r}
+setwd(here("data","data-processed"))
+load("state_year_wts_overall.RData")
+state_year_wts_overall %>% slice(1) %>% pull(pop_tot_all_treated_years)
+```
+
+Share of that total contributed by each state
+```{r}
+state_year_wts_overall  %>%
+  left_join(lookup_state_id_state_abb,by="state_id") %>%
+  dplyr::select(state_abb,everything()) %>%
+  group_by(state_abb) %>% 
+  summarise(prop_of_tot_pop_year=sum(prop_of_tot_pop_year,na.rm=T)) %>% 
+  ungroup() %>% 
+  arrange(desc(prop_of_tot_pop_year))
+```
+
+
+Total person-years of Black adults aged 45-64 over all treated states and years
+```{r}
+setwd(here("data","data-processed"))
+load("state_year_wts_race_b.RData")
+state_year_wts_race_b %>% slice(1) %>% pull(pop_tot_all_treated_years)
+```
+
+Share of that total contributed by each treated state
+```{r}
+state_year_wts_race_b %>%
+  left_join(lookup_state_id_state_abb,by="state_id") %>%
+  dplyr::select(state_abb,everything()) %>%
+  group_by(state_abb) %>% 
+  summarise(prop_of_tot_pop_year=sum(prop_of_tot_pop_year,na.rm=T)) %>% 
+  ungroup() %>% 
+  arrange(desc(prop_of_tot_pop_year))
+```
+
+
+
+
 
 

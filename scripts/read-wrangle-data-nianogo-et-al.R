@@ -616,6 +616,9 @@ nrow(covars_alt)
 lookup_state_id_state_abb=covars_alt %>% 
   distinct(state_id,state_abb)
 
+#Save this to make maps in RMarkdown
+setwd(here("data","data-processed"))
+save(lookup_state_id_state_abb,file="lookup_state_id_state_abb.RData")
 lookup_state_id_state_abb
 #lookup_state_id that includes state_fips
 
@@ -701,8 +704,9 @@ state_wts_by_treated_year_overall =covars_alt %>%
 
 state_wts_by_treated_year_overall %>% 
      left_join(lookup_state_id_state_abb,by="state_id") %>% 
-    dplyr::select(state_abb,everything()) %>% 
-     View()
+    dplyr::select(state_abb,everything()) #%>%      View()
+
+
 
 #Grab the men and women weights as well
 #### men-------
@@ -838,22 +842,27 @@ state_year_wts_overall =covars_alt %>%
                 starts_with("pop_tot_all"),
                 starts_with("prop_of_tot_pop_year"))
 
+#Jan 3, 2024
+#Saving this to use in RMarkdown doc
+setwd(here("data","data-processed"))
+save(state_year_wts_overall,file="state_year_wts_overall.RData")
+
 state_year_wts_overall %>% 
   left_join(lookup_state_id_state_abb,by="state_id") %>% 
   dplyr::select(state_abb,everything()) %>% 
   View()
 
-covars_alt_treated_states_for_join=covars_alt %>% 
+pop_bot_45_64_treated_states_for_join=covars_alt %>% 
 #  filter(state_id==6) %>%
   filter(treatedpost==1) %>% 
   dplyr::select(year, state_id,pop_bot_45_64)
 
-covars_alt_treated_states_for_join
+pop_bot_45_64_treated_states_for_join
 
 state_year_wts_overall %>% 
   left_join(lookup_state_id_state_abb,by="state_id") %>% 
   filter(state_abb=="CA") %>% 
-  left_join(covars_alt_treated_states_for_join,by=c("year","state_id"))
+  left_join(pop_bot_45_64_treated_states_for_join,by=c("year","state_id"))
 
 #person years per year
 n_treated_years=state_year_wts_overall %>% 
@@ -877,9 +886,12 @@ pop_tot_all_treated_person_years/n_treated_years
 state_year_wts_overall %>% 
   left_join(lookup_state_id_state_abb,by="state_id") %>% 
 #  filter(state_abb=="CA") %>% 
-  left_join(covars_alt_treated_states_for_join,by=c("year","state_id")) %>% 
-  group_by(state_id) %>% 
-  summarise(prop_of_tot_pop_year=sum(prop_of_tot_pop_year,na.rm=T)) %>% 
+  left_join(pop_bot_45_64_treated_states_for_join,by=c("year","state_id")) %>% 
+  group_by(state_abb) %>% 
+  summarise(
+    prop_of_tot_pop_year=sum(prop_of_tot_pop_year,na.rm=T),
+    
+    ) %>% 
   View()
 
 #### men------
@@ -944,6 +956,10 @@ state_year_wts_race_b =covars_alt %>%
                 starts_with("pop_tot_all"),
                 starts_with("prop_of_tot_pop_year"))
 
+#save for use in Rmarkdown
+setwd(here("data","data-processed"))
+save(state_year_wts_race_b,file="state_year_wts_race_b.RData")
+
 state_year_wts_race_b %>%
   left_join(lookup_state_id_state_abb,by="state_id") %>%
   dplyr::select(state_abb,everything()) %>%
@@ -953,7 +969,7 @@ state_year_wts_race_b %>%
 state_year_wts_race_b %>%
   left_join(lookup_state_id_state_abb,by="state_id") %>%
   dplyr::select(state_abb,everything()) %>%
-  group_by(state_id) %>% 
+  group_by(state_abb) %>% 
   summarise(prop_of_tot_pop_year=sum(prop_of_tot_pop_year,na.rm=T)) %>% 
   View()
 

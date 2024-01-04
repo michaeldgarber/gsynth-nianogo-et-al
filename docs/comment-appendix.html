@@ -11,7 +11,7 @@
 
 <meta name="author" content="Michael D. Garber" />
 
-<meta name="date" content="2024-01-03" />
+<meta name="date" content="2024-01-04" />
 
 <title>Appendix for comment on Nianogo et al.</title>
 
@@ -345,7 +345,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Appendix for comment on Nianogo et al.</h1>
 <h4 class="author">Michael D. Garber</h4>
-<h4 class="date">2024-01-03</h4>
+<h4 class="date">2024-01-04</h4>
 
 </div>
 
@@ -1394,12 +1394,12 @@ lookup_state_abb_geo_simplify_shift_al_hi %&gt;%
   ) %&gt;% 
   ungroup() %&gt;% 
   knitr::kable(
-    caption=&quot;95% CI for weighted average treatment effects in treated&quot;,
+    caption=&quot;95% CIs for weighted average treatment effects in treated&quot;,
     digits=2)</code></pre>
 <pre><code>## `summarise()` has grouped output by &#39;boot_rep&#39;. You can override using the
 ## `.groups` argument.</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-60">Table 3.2: </span>95% CI for weighted average treatment effects in treated</caption>
+<caption><span id="tab:unnamed-chunk-60">Table 3.2: </span>95% CIs for weighted average treatment effects in treated</caption>
 <colgroup>
 <col width="17%" />
 <col width="20%" />
@@ -1429,16 +1429,93 @@ lookup_state_abb_geo_simplify_shift_al_hi %&gt;%
 </div>
 </div>
 </div>
-<div id="support-of-miscellaneous-statements-from-text" class="section level1" number="4">
-<h1><span class="header-section-number">4</span> Support of miscellaneous statements from text</h1>
-<p>To do</p>
-<div id="negative-predicted-counterfactual-outomes" class="section level2" number="4.1">
-<h2><span class="header-section-number">4.1</span> Negative predicted counterfactual outomes</h2>
-<p>I stated in the main text that the minimum pre- dicted value of the counterfactual outcome in the treatment period over the replicates for the Hispanic population in Scenario 2 was −6091 CVD deaths per 100,000 adults.</p>
-<p>The below code shows that:</p>
+<div id="support-for-in-text-statements" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Support for in-text statements</h1>
+<p>This section includes supporting information for some statements that I made in the text.</p>
+<div id="negative-predicted-counterfactual-outomes-in-some-groups" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Negative predicted counterfactual outomes in some groups</h2>
+<p>I stated the following in the main text: “the minimum predicted value of the counterfactual outcome in the treatment period over the replicates for the Hispanic population in Scenario 2 was −6091 CVD deaths per 100,000 adults.”</p>
+<p>The gsynth model output for the Hispanic population under Scenario 2 is created here:
+gsynth-nianogo-et-al/scripts/gsynth-analyses-to-post.R</p>
+<p>I’m loading its cleaned-up output here</p>
+<pre class="r"><code>setwd(here(&quot;data&quot;,&quot;data-processed&quot;))
+load(&quot;gsynth_out_tib_hispanic_sub_pol.RData&quot;)</code></pre>
+<p>Below is the distribution of the predicted counterfactual outcomes. The minimum value is below zero, which is not plausible for a mortality rate.</p>
+<pre class="r"><code>summary(gsynth_out_tib_hispanic_sub_pol$y_ct_boot)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+## -1995.6    80.3   106.0   116.2   133.9  3110.6</code></pre>
+<pre class="r"><code>gsynth_out_tib_hispanic_sub_pol %&gt;% 
+  ggplot(aes(x=y_ct_boot))+
+  geom_histogram()+
+  theme_bw()</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="comment-appendix_files/figure-html/unnamed-chunk-62-1.png" width="672" /></p>
 </div>
 <div id="implausible-demographic-values" class="section level2" number="4.2">
 <h2><span class="header-section-number">4.2</span> Implausible demographic values</h2>
+<p>In the main text, I also noted that there were implausible values in age-group-race subgroups. I stated that, “in one state-year, the data state that 100% of Hispanic adults aged 45 to 64 years were men, while in another state-year, 0% were.”</p>
+<p>The histograms in the sub-section titled “Exploring data”&gt;“Distribution of BRFSS covariates”&gt;“Proportion men” shows that data. Copied here:</p>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##  0.0000  0.3693  0.4200  0.4188  0.4651  1.0000</code></pre>
+<p><img src="comment-appendix_files/figure-html/unnamed-chunk-63-1.png" width="672" /></p>
+</div>
+<div id="state-by-state-share-of-total-person-years-of-adults-aged-45-64" class="section level2" number="4.3">
+<h2><span class="header-section-number">4.3</span> State-by-state share of total person-years of adults aged 45-64</h2>
+<p>In the text, I stated, “Considering the total population of adults aged 45 to 64 years, for example, there were 309,495,338 person-years over all treated states and years. California contributed the largest share (19.1%) to this total. Considering Black adults in this age range, the state of New York contributed the largest share (15.8%) of the 29,839,638 total treated person-years available for analysis.”</p>
+<p>Total person-years of adults aged 45-64 over all treated states and years</p>
+<pre class="r"><code>setwd(here(&quot;data&quot;,&quot;data-processed&quot;))
+load(&quot;state_year_wts_overall.RData&quot;)
+state_year_wts_overall %&gt;% slice(1) %&gt;% pull(pop_tot_all_treated_years)</code></pre>
+<pre><code>## [1] 309495338</code></pre>
+<p>Share of that total contributed by each state</p>
+<pre class="r"><code>state_year_wts_overall  %&gt;%
+  left_join(lookup_state_id_state_abb,by=&quot;state_id&quot;) %&gt;%
+  dplyr::select(state_abb,everything()) %&gt;%
+  group_by(state_abb) %&gt;% 
+  summarise(prop_of_tot_pop_year=sum(prop_of_tot_pop_year,na.rm=T)) %&gt;% 
+  ungroup() %&gt;% 
+  arrange(desc(prop_of_tot_pop_year))</code></pre>
+<pre><code>## # A tibble: 34 × 2
+##    state_abb prop_of_tot_pop_year
+##    &lt;chr&gt;                    &lt;dbl&gt;
+##  1 CA                      0.191 
+##  2 NY                      0.101 
+##  3 IL                      0.0648
+##  4 OH                      0.0607
+##  5 PA                      0.0566
+##  6 MI                      0.0528
+##  7 NJ                      0.0480
+##  8 WA                      0.0365
+##  9 MA                      0.0362
+## 10 AZ                      0.0327
+## # ℹ 24 more rows</code></pre>
+<p>Total person-years of Black adults aged 45-64 over all treated states and years</p>
+<pre class="r"><code>setwd(here(&quot;data&quot;,&quot;data-processed&quot;))
+load(&quot;state_year_wts_race_b.RData&quot;)
+state_year_wts_race_b %&gt;% slice(1) %&gt;% pull(pop_tot_all_treated_years)</code></pre>
+<pre><code>## [1] 29839638</code></pre>
+<p>Share of that total contributed by each treated state</p>
+<pre class="r"><code>state_year_wts_race_b %&gt;%
+  left_join(lookup_state_id_state_abb,by=&quot;state_id&quot;) %&gt;%
+  dplyr::select(state_abb,everything()) %&gt;%
+  group_by(state_abb) %&gt;% 
+  summarise(prop_of_tot_pop_year=sum(prop_of_tot_pop_year,na.rm=T)) %&gt;% 
+  ungroup() %&gt;% 
+  arrange(desc(prop_of_tot_pop_year))</code></pre>
+<pre><code>## # A tibble: 34 × 2
+##    state_abb prop_of_tot_pop_year
+##    &lt;chr&gt;                    &lt;dbl&gt;
+##  1 NY                      0.158 
+##  2 CA                      0.120 
+##  3 MD                      0.0959
+##  4 IL                      0.0907
+##  5 OH                      0.0704
+##  6 MI                      0.0672
+##  7 NJ                      0.0631
+##  8 PA                      0.0573
+##  9 LA                      0.0483
+## 10 MA                      0.0250
+## # ℹ 24 more rows</code></pre>
 </div>
 </div>
 
