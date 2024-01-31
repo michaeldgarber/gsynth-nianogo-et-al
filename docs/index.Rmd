@@ -1,6 +1,6 @@
 ---
 title: "Web materials for comment on Nianogo et al."
-subtitle: "Corresponding to article titled Precision and weighting of effects estimated by the generalized synthetic control and related methods"
+subtitle: "Corresponding article: Precision and weighting of effects estimated by the generalized synthetic control and related methods"
 author: "Michael D. Garber, PhD MPH"
 date: "`r Sys.Date()`"
 output: 
@@ -12,6 +12,6 @@ URL of this page: <https://michaeldgarber.github.io/gsynth-nianogo-et-al/index.h
 
 Github repository: <https://github.com/michaeldgarber/gsynth-nianogo-et-al>
 
-Related article: [Precision and Weighting of Effects Estimated by the Generalized Synthetic Control and Related Methods: The Case of Medicaid Expansion](https://journals.lww.com/epidem/fulltext/2024/03000/precision_and_weighting_of_effects_estimated_by.17.aspx). *Epidemiology*. 2024.
+Article: [Precision and Weighting of Effects Estimated by the Generalized Synthetic Control and Related Methods: The Case of Medicaid Expansion](https://journals.lww.com/epidem/fulltext/2024/03000/precision_and_weighting_of_effects_estimated_by.17.aspx). *Epidemiology*. 2024.
 
-Appendix to that article: <https://michaeldgarber.github.io/gsynth-nianogo-et-al/comment-appendix.html>
+Online appendix: <https://michaeldgarber.github.io/gsynth-nianogo-et-al/comment-appendix.html>
