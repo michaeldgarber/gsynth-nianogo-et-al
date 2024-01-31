@@ -11,14 +11,15 @@ output:
 
 
 # Introduction
-This appendix contains supporting information and code related to my comment on Nianogo et al.'s article.
+This appendix contains supporting information and code related to my article, [Precision and Weighting of Effects Estimated by the Generalized Synthetic Control and Related Methods: The Case of Medicaid Expansion](https://journals.lww.com/epidem/fulltext/2024/03000/precision_and_weighting_of_effects_estimated_by.17.aspx), a comment on Nianogo et al.'s [article](https://journals.lww.com/epidem/fulltext/2024/03000/medicaid_expansion_and_racial_ethnic_and_sex.16.aspx).
 
 The R Markdown file that creates this web page is located here:
 https://github.com/michaeldgarber/gsynth-nianogo-et-al/blob/main/docs/comment-appendix.Rmd
 
 
-The authors provide their data and code here:
-https://anonymous.4open.science/r/Medicaid-CVD-Disparities-4CB7/README.md
+Nianogo and colleagues provide their data and code here:
+https://github.com/nianogo/Medicaid-CVD-Disparities
+
 
 I've done some additional processing to that data in the scripts located in this folder:
 https://github.com/michaeldgarber/gsynth-nianogo-et-al/tree/main/scripts
