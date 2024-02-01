@@ -11,7 +11,7 @@ output:
 
 
 # Introduction
-This appendix contains supporting information and code related to my article, [Precision and Weighting of Effects Estimated by the Generalized Synthetic Control and Related Methods: The Case of Medicaid Expansion](https://journals.lww.com/epidem/fulltext/2024/03000/precision_and_weighting_of_effects_estimated_by.17.aspx), a comment on Nianogo et al.'s [article](https://journals.lww.com/epidem/fulltext/2024/03000/medicaid_expansion_and_racial_ethnic_and_sex.16.aspx).
+This appendix contains supporting information and code related to [Precision and Weighting of Effects Estimated by the Generalized Synthetic Control and Related Methods: The Case of Medicaid Expansion](https://journals.lww.com/epidem/fulltext/2024/03000/precision_and_weighting_of_effects_estimated_by.17.aspx), a comment on Nianogo et al.'s [article](https://journals.lww.com/epidem/fulltext/2024/03000/medicaid_expansion_and_racial_ethnic_and_sex.16.aspx).
 
 The R Markdown file that creates this web page is located here:
 https://github.com/michaeldgarber/gsynth-nianogo-et-al/blob/main/docs/comment-appendix.Rmd
