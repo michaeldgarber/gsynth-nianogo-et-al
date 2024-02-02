@@ -8,10 +8,10 @@ output:
     toc: FALSE #overwrite the _yml
 ---
 
-URL of this page: <https://michaeldgarber.github.io/gsynth-nianogo-et-al/index.html>
-
-Github repository: <https://github.com/michaeldgarber/gsynth-nianogo-et-al>
-
 Article: [Precision and Weighting of Effects Estimated by the Generalized Synthetic Control and Related Methods: The Case of Medicaid Expansion](https://journals.lww.com/epidem/fulltext/2024/03000/precision_and_weighting_of_effects_estimated_by.17.aspx). *Epidemiology*. 2024.
 
 Online appendix: <https://michaeldgarber.github.io/gsynth-nianogo-et-al/comment-appendix.html>
+
+GitHub repository: <https://github.com/michaeldgarber/gsynth-nianogo-et-al>
+
+URL of this page: <https://michaeldgarber.github.io/gsynth-nianogo-et-al/index.html>
